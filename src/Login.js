@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { jwtDecode } from "jwt-decode"; // ИСПРАВЛЕННЫЙ ИМПОРТ
+import { jwtDecode } from 'jwt-decode';
 
 import './Login.css';
 
@@ -22,15 +22,16 @@ function Login() {
             localStorage.setItem('token', token);
 
             // Decode the token
-            const decodedToken = jwtDecode(token); // ИСПРАВЛЕННЫЙ ВЫЗОВ
+            const decodedToken = jwtDecode(token);
             console.log('Decoded token:', decodedToken); // Debugging token structure
 
             const userId = decodedToken.userId; // Get userId from token
-            const userName = decodedToken.unique_name; // Get username from token
+            const userName = decodedToken.name; // Get username from token
 
             if (userId && userName) {
                 localStorage.setItem('userId', userId); // Save userId in localStorage
                 localStorage.setItem('username', userName); // Save username in localStorage
+                localStorage.setItem('role', decodedToken.role); // Save role in localStorage
             } else {
                 console.error('userId or username not found in token');
             }

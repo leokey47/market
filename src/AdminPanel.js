@@ -5,27 +5,79 @@ import axios from 'axios';
 function AdminPanel() {
     const navigate = useNavigate();
     const [userRole, setUserRole] = useState(null);
+    const [products, setProducts] = useState([]);
+    const [newProduct, setNewProduct] = useState({
+        name: '',
+        description: '',
+        price: 0,
+        imageUrl: '',
+        category: '',
+    });
 
+    // Проверка роли пользователя при загрузке страницы
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (!token) {
+        const storedRole = localStorage.getItem('role'); // Роль сохраняем в localStorage
+
+        if (!token || storedRole !== 'admin') {
             navigate('/login');
             return;
         }
-        
-        try {
-            const decodedToken = JSON.parse(atob(token.split('.')[1]));
-            if (decodedToken.role !== 'admin') {
-                navigate('/');
-            } else {
-                setUserRole('admin');
-            }
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            navigate('/login');
-        }
+
+        setUserRole(storedRole);
+        fetchProducts(); // Получаем список продуктов
     }, [navigate]);
 
+    // Получение списка продуктов
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get('https://localhost:7209/api/Product');
+            setProducts(response.data);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    };
+
+    // Обработчик изменения значений в форме добавления продукта
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewProduct((prevProduct) => ({
+            ...prevProduct,
+            [name]: value,
+        }));
+    };
+
+    // Добавление нового продукта
+    const handleAddProduct = async (e) => {
+        e.preventDefault();
+
+        try {
+            const response = await axios.post('https://localhost:7209/api/Product', newProduct);
+            setProducts((prevProducts) => [...prevProducts, response.data]);
+            setNewProduct({ name: '', description: '', price: 0, imageUrl: '', category: '' });
+        } catch (error) {
+            console.error('Error adding product:', error);
+        }
+    };
+
+    // Удаление продукта
+    const handleDeleteProduct = async (id) => {
+        try {
+            await axios.delete(`https://localhost:7209/api/Product/${id}`);
+            setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
+    };
+
+    // Логика выхода из панели администратора
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role'); // Удаляем роль
+        navigate('/login');
+    };
+
+    // Если роль не 'admin', возвращаем null
     if (userRole !== 'admin') {
         return null;
     }
@@ -34,10 +86,64 @@ function AdminPanel() {
         <div>
             <h1>Admin Panel</h1>
             <p>Welcome, Admin!</p>
-            <button onClick={() => {
-                localStorage.removeItem('token');
-                navigate('/login');
-            }}>Logout</button>
+            <button onClick={handleLogout}>Logout</button>
+
+            <h2>Add Product</h2>
+            <form onSubmit={handleAddProduct}>
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Product Name"
+                    value={newProduct.name}
+                    onChange={handleInputChange}
+                    required
+                />
+                <textarea
+                    name="description"
+                    placeholder="Description"
+                    value={newProduct.description}
+                    onChange={handleInputChange}
+                    required
+                />
+                <input
+                    type="number"
+                    name="price"
+                    placeholder="Price"
+                    value={newProduct.price}
+                    onChange={handleInputChange}
+                    required
+                />
+                <input
+                    type="text"
+                    name="imageUrl"
+                    placeholder="Image URL"
+                    value={newProduct.imageUrl}
+                    onChange={handleInputChange}
+                />
+                <input
+                    type="text"
+                    name="category"
+                    placeholder="Category"
+                    value={newProduct.category}
+                    onChange={handleInputChange}
+                    required
+                />
+                <button type="submit">Add Product</button>
+            </form>
+
+            <h2>Product List</h2>
+            <ul>
+                {products.map((product) => (
+                    <li key={product.id}>
+                        <h3>{product.name}</h3>
+                        <p>{product.description}</p>
+                        <p>Price: ${product.price}</p>
+                        <p>Category: {product.category}</p>
+                        {product.imageUrl && <img src={product.imageUrl} alt={product.name} width="100" />}
+                        <button onClick={() => handleDeleteProduct(product.id)}>Delete</button>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }
