@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Получаем данные с API
     axios.get('https://localhost:7209/api/Product')
       .then(response => {
         setProducts(response.data);
@@ -23,6 +24,7 @@ const ProductsPage = () => {
   return (
     <div>
       <h1>Products</h1>
+      <button onClick={() => navigate('/login')}>Go to Login</button>
       <div className="products-list">
         {products.map(product => (
           <div key={product.id} className="product-card">
