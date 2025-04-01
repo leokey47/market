@@ -4,6 +4,8 @@ import ProductsPage from './ProductsPage';
 import LoginPage from './Login';
 import RegisterPage from './Register';
 import AdminPanel from './AdminPanel';
+import UserPage from './UserProfile';
+
 
 const App = () => {
   return (
@@ -13,6 +15,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/user" element={<UserPage />} />
       </Routes>
     </Router>
   );
