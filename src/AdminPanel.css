@@ -1,0 +1,389 @@
+/* Основные стили */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Контейнер админ-панели */
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Заголовок панели администратора */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #3c6ebe;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Кнопка выхода */
+.logout-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #c0392b;
+}
+
+/* Уведомления */
+.error-message, .success-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.error-message {
+    background-color: #ffebee;
+    border: 1px solid #ffcdd2;
+    color: #c62828;
+}
+
+.success-message {
+    background-color: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    color: #2e7d32;
+}
+
+/* Контейнер формы */
+.form-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.form-container h2 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* Стили для форм */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #3c6ebe;
+    box-shadow: 0 0 0 3px rgba(60, 110, 190, 0.2);
+    outline: none;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Загрузка файлов */
+.file-upload {
+    display: flex;
+    align-items: center;
+}
+
+.upload-status {
+    margin-left: 12px;
+    color: #3c6ebe;
+    font-weight: 500;
+}
+
+/* Предпросмотр изображения */
+.image-preview {
+    width: 160px;
+    height: 160px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Кнопки действий */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.save-button, .cancel-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #3c8c40;
+}
+
+.cancel-button {
+    background-color: #9e9e9e;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #7e7e7e;
+}
+
+/* Контейнер списка продуктов */
+.products-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+}
+
+.products-container h2 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* Фильтры */
+.filters {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+    }
+    
+    .search-box, .category-filter {
+        width: 100%;
+    }
+}
+
+.search-box {
+    flex: 1;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.category-filter {
+    width: 250px;
+}
+
+.category-filter select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+/* Состояние загрузки */
+.loading, .no-products {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Сетка товаров */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+/* Карточка товара */
+.product-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-image {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: #f5f5f5;
+    color: #999;
+}
+
+.product-info {
+    padding: 16px;
+}
+
+.product-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.product-category {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #3c6ebe;
+    margin-bottom: 12px;
+}
+
+.product-description {
+    font-size: 0.9rem;
+    color: #555;
+    max-height: 80px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.product-actions {
+    display: flex;
+    padding: 12px 16px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+}
+
+.edit-button, .delete-button {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.edit-button {
+    background-color: #3c6ebe;
+    color: white;
+    margin-right: 8px;
+}
+
+.edit-button:hover {
+    background-color: #2c5aa0;
+}
+
+.delete-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c0392b;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.admin-container {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.success-message, .error-message {
+    animation: fadeIn 0.3s ease-in-out;
+}
