@@ -21,25 +21,21 @@ function Login() {
             const token = response.data.token;
             localStorage.setItem('token', token);
 
-            // Decode the token
             const decodedToken = jwtDecode(token);
-            console.log('Decoded token:', decodedToken); // Debugging token structure
-
-            const userId = decodedToken.userId; // Get userId from token
-            const userName = decodedToken.name; // Get username from token
+            const userId = decodedToken.userId; 
+            const userName = decodedToken.name; 
+            const userRole = decodedToken.role;
 
             if (userId && userName) {
-                localStorage.setItem('userId', userId); // Save userId in localStorage
-                localStorage.setItem('username', userName); // Save username in localStorage
-                localStorage.setItem('role', decodedToken.role); // Save role in localStorage
+                localStorage.setItem('userId', userId); 
+                localStorage.setItem('username', userName); 
+                localStorage.setItem('role', userRole); 
             } else {
                 console.error('userId or username not found in token');
             }
 
-            // Redirect based on user role
-            const userRole = decodedToken.role;
             if (userRole === 'admin') {
-                navigate('/admin');
+                navigate('/admin'); // Перенаправление в админку
             } else {
                 navigate('/');
             }
@@ -47,6 +43,11 @@ function Login() {
             setMessage('Login failed: ' + (error.response ? error.response.data : error.message));
         }
     };
+
+    // const handleLogout = () => {
+    //     localStorage.clear();
+    //     navigate('/');
+    // };
 
     return (
         <div className="app-container">
@@ -98,6 +99,7 @@ function Login() {
                         {message && <p className="error-message">{message}</p>}
                         <Link to="/register" className="register-link">Register</Link>
                         <p className="forgot-password">Forgot password?</p>
+                        {/* <button onClick={handleLogout} className="logout-button">Logout</button> */}
                     </div>
                 </div>
                 <div className="creativity-message">

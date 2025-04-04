@@ -24,7 +24,7 @@ const ProductsPage = () => {
   return (
     <div>
       <h1>Products</h1>
-      <button onClick={() => navigate('/login')}>Go to Login</button>
+      {/* <button onClick={() => navigate('/login')}>Go to Login</button> */}
       <div className="products-list">
         {products.map(product => (
           <div key={product.id} className="product-card">

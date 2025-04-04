@@ -27,6 +27,12 @@ function UserProfile() {
         });
     }, [navigate]);
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        navigate('/login');
+    };
+
     if (!user) {
         return <p>Loading...</p>;
     }
@@ -37,6 +43,7 @@ function UserProfile() {
             <p><strong>Username:</strong> {user.username}</p>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Role:</strong> {user.role}</p>
+            <button onClick={handleLogout} className="logout-button">Logout</button>
         </div>
     );
 }
