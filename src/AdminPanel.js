@@ -47,12 +47,57 @@ function AdminPanel() {
         }));
     };
 
-    // Добавление нового продукта
+    // Обработчик загрузки изображения
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+    
+        const formData = new FormData();
+        formData.append("file", file);
+    
+        const token = localStorage.getItem("token");
+    
+        try {
+            const response = await axios.post("https://localhost:7209/api/Cloudinary/upload", formData, {
+                headers: { 
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+    
+            console.log("Cloudinary response:", response.data);
+    
+            // Обновляем newProduct после загрузки изображения
+            setNewProduct((prevProduct) => ({
+                ...prevProduct,
+                imageUrl: response.data.imageUrl,
+            }));
+        } catch (error) {
+            console.error("Error uploading image:", error);
+        }
+    };
+    
+
     const handleAddProduct = async (e) => {
         e.preventDefault();
-
+    
+        if (!newProduct.imageUrl) {
+            alert("Ошибка: изображение еще не загружено!");
+            return;
+        }
+    
+        const token = localStorage.getItem("token");
+    
+        console.log("Product before sending:", newProduct);
+    
         try {
-            const response = await axios.post('https://localhost:7209/api/Product', newProduct);
+            const response = await axios.post('https://localhost:7209/api/Product', newProduct, {
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+    
             setProducts((prevProducts) => [...prevProducts, response.data]);
             setNewProduct({ name: '', description: '', price: 0, imageUrl: '', category: '' });
         } catch (error) {
@@ -62,13 +107,24 @@ function AdminPanel() {
 
     // Удаление продукта
     const handleDeleteProduct = async (id) => {
+        console.log("Deleting product with ID:", id);
+        const token = localStorage.getItem('token'); // Получаем токен
+    
         try {
-            await axios.delete(`https://localhost:7209/api/Product/${id}`);
+            const response = await axios.delete(`https://localhost:7209/api/Product/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Добавляем токен в заголовок
+                },
+            });
+    
+            console.log("Delete response:", response);
             setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
         } catch (error) {
-            console.error('Error deleting product:', error);
+            console.error('Error deleting product:', error.response?.data || error.message);
         }
     };
+    
+    
 
     // Логика выхода из панели администратора
     const handleLogout = () => {
@@ -114,12 +170,10 @@ function AdminPanel() {
                     required
                 />
                 <input
-                    type="text"
-                    name="imageUrl"
-                    placeholder="Image URL"
-                    value={newProduct.imageUrl}
-                    onChange={handleInputChange}
+                    type="file"
+                    onChange={handleFileUpload}
                 />
+                {newProduct.imageUrl && <img src={newProduct.imageUrl} alt="Uploaded" width="100" />}
                 <input
                     type="text"
                     name="category"
