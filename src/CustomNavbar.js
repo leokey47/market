@@ -17,7 +17,7 @@ const CustomNavbar = () => {
     };
   }, []);
 
-  if (userRole === 'admin') return null; // Скрываем Navbar для админа
+  
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
@@ -28,6 +28,7 @@ const CustomNavbar = () => {
           <Nav className="ms-auto">
             <Nav.Link as={Link} to="/">Главное меню</Nav.Link>
             {userRole === 'user' && <Nav.Link as={Link} to="/profile">Профиль</Nav.Link>}
+            {userRole === 'admin' && <Nav.Link as={Link} to="/admin">админ!</Nav.Link>}
           </Nav>
         </Navbar.Collapse>
       </Container>

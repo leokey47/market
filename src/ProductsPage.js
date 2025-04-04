@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+import './ProductsPage.css';
+
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,22 +21,49 @@ const ProductsPage = () => {
       });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="loading-spinner"></div>
+    </div>
+  );
 
   return (
-    <div>
-      <h1>Products</h1>
-      {/* <button onClick={() => navigate('/login')}>Go to Login</button> */}
-      <div className="products-list">
-        {products.map(product => (
-          <div key={product.id} className="product-card">
-            <img src={product.imageUrl} alt={product.name} width={200} />
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p>Price: ${product.price}</p>
-            <p>Category: {product.category}</p>
-          </div>
-        ))}
+    <div className="products-container">
+      <div className="products-wrapper">
+        <h1 className="products-title">Market name xd</h1>
+        
+        <div className="products-list">
+          {products.map(product => (
+            <div key={product.id} className="product-card">
+              <div className="product-image-container">
+                <img 
+                  src={product.imageUrl} 
+                  alt={product.name}
+                  className="product-image"
+                />
+                <div className="product-image-overlay"></div>
+              </div>
+              
+              <div className="product-info">
+                <div className="product-header">
+                  <h3 className="product-name">{product.name}</h3>
+                  <span className="product-category">
+                    {product.category}
+                  </span>
+                </div>
+                
+                <p className="product-description">{product.description}</p>
+                
+                <div className="product-footer">
+                  <p className="product-price">${product.price}</p>
+                  <button className="add-to-cart-button">
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
