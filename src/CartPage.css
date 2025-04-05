@@ -1,0 +1,43 @@
+.cart-page {
+    min-height: 70vh;
+    padding-top: 2rem;
+  }
+  
+  .cart-item {
+    transition: background-color 0.2s;
+  }
+  
+  .cart-item:hover {
+    background-color: rgba(0, 0, 0, 0.01);
+  }
+  
+  .cart-item-image {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .cart-item-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .cart-item-price, 
+  .cart-item-total {
+    font-size: 0.95rem;
+  }
+  
+  .quantity-input {
+    width: 60px;
+    height: 38px;
+  }
+  
+  /* Fix Bootstrap button sizes */
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  

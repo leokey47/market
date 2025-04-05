@@ -1,38 +1,62 @@
-.App {
-  text-align: center;
+/* Main app styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.content-wrapper {
+  margin-top: 70px; /* Adjusted to match navbar height */
+  min-height: calc(100vh - 70px);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* Overrides for Bootstrap components */
+.btn-primary {
+  background-color: #5A31F4;
+  border-color: #5A31F4;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.btn-primary:hover, 
+.btn-primary:focus, 
+.btn-primary:active {
+  background-color: #4823d9 !important;
+  border-color: #4823d9 !important;
 }
 
-.App-link {
-  color: #61dafb;
+.btn-outline-primary {
+  color: #5A31F4;
+  border-color: #5A31F4;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+.btn-outline-primary:hover {
+  background-color: #5A31F4;
+  border-color: #5A31F4;
+}
+
+/* Common utility classes */
+.text-primary {
+  color: #5A31F4 !important;
+}
+
+.bg-primary {
+  background-color: #5A31F4 !important;
+}
+
+/* Card hover effects */
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-wrapper {
+    margin-top: 60px; /* Adjusted for mobile navbar */
   }
 }

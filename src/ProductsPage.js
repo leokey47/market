@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { CartService, WishlistService } from './ApiService'; // Импортируем сервисы API
 import './ProductsPage.css';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState({});
+  const [addingToWishlist, setAddingToWishlist] = useState({});
+  const [statusMessage, setStatusMessage] = useState(null);
 
   useEffect(() => {
     // Fetch products from your API
@@ -19,14 +23,87 @@ const ProductsPage = () => {
       });
   }, []);
 
-  const addToCart = (productId) => {
-    console.log(`Product ${productId} added to cart`);
-    // Add your cart functionality here
+  const addToCart = async (productId) => {
+    try {
+      // Проверяем наличие токена
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Если токена нет, перенаправляем на страницу логина
+        window.location.href = '/login';
+        return;
+      }
+
+      // Отмечаем, что товар добавляется в корзину
+      setAddingToCart(prev => ({ ...prev, [productId]: true }));
+      
+      // Реальный запрос к API
+      await CartService.addToCart(productId, 1);
+      
+      // Обновляем счетчик корзины в localStorage
+      const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
+      localStorage.setItem('cartCount', currentCount + 1);
+      window.dispatchEvent(new Event('storage'));
+      
+      // Показываем сообщение об успехе
+      setStatusMessage({ type: 'success', text: 'Товар добавлен в корзину' });
+      
+      // Скрываем сообщение через 3 секунды
+      setTimeout(() => setStatusMessage(null), 3000);
+      
+      console.log(`Product ${productId} added to cart`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setStatusMessage({ type: 'error', text: 'Ошибка при добавлении в корзину' });
+      setTimeout(() => setStatusMessage(null), 3000);
+    } finally {
+      // Убираем индикатор загрузки
+      setAddingToCart(prev => ({ ...prev, [productId]: false }));
+    }
   };
 
-  const toggleFavorite = (productId) => {
-    console.log(`Toggled favorite for product ${productId}`);
-    // Add your wishlist functionality here
+  const toggleFavorite = async (productId) => {
+    try {
+      // Проверяем наличие токена
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Если токена нет, перенаправляем на страницу логина
+        window.location.href = '/login';
+        return;
+      }
+
+      // Отмечаем, что товар добавляется в избранное
+      setAddingToWishlist(prev => ({ ...prev, [productId]: true }));
+      
+      // Реальный запрос к API
+      await WishlistService.addToWishlist(productId);
+      
+      // Обновляем счетчик избранного в localStorage
+      const currentCount = parseInt(localStorage.getItem('wishlistCount') || '0');
+      localStorage.setItem('wishlistCount', currentCount + 1);
+      window.dispatchEvent(new Event('storage'));
+      
+      // Показываем сообщение об успехе
+      setStatusMessage({ type: 'success', text: 'Товар добавлен в список желаемого' });
+      
+      // Скрываем сообщение через 3 секунды
+      setTimeout(() => setStatusMessage(null), 3000);
+      
+      console.log(`Toggled favorite for product ${productId}`);
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      
+      // Проверяем, не сообщение ли это о том, что товар уже в избранном
+      if (error.response?.data?.message?.includes('уже в списке')) {
+        setStatusMessage({ type: 'info', text: 'Товар уже в списке желаемого' });
+      } else {
+        setStatusMessage({ type: 'error', text: 'Ошибка при добавлении в список желаемого' });
+      }
+      
+      setTimeout(() => setStatusMessage(null), 3000);
+    } finally {
+      // Убираем индикатор загрузки
+      setAddingToWishlist(prev => ({ ...prev, [productId]: false }));
+    }
   };
 
   if (loading) {
@@ -41,6 +118,13 @@ const ProductsPage = () => {
     <div className="marketplace-container">
       <h2 className="marketplace-heading">Популярные товары</h2>
       
+      {/* Уведомление об успехе/ошибке */}
+      {statusMessage && (
+        <div className={`marketplace-notification ${statusMessage.type}`}>
+          {statusMessage.text}
+        </div>
+      )}
+      
       <div className="marketplace-grid">
         {products.map(product => (
           <div key={product.id} className="marketplace-card">
@@ -53,14 +137,19 @@ const ProductsPage = () => {
             
             {/* Favorite button */}
             <button 
-              className="marketplace-favorite-btn" 
+              className={`marketplace-favorite-btn ${addingToWishlist[product.id] ? 'loading' : ''}`}
               onClick={() => toggleFavorite(product.id)}
+              disabled={addingToWishlist[product.id]}
               aria-label="Add to favorites"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
-                  stroke="currentColor" strokeWidth="2" fill="none" />
-              </svg>
+              {addingToWishlist[product.id] ? (
+                <span className="btn-spinner"></span>
+              ) : (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                    stroke="currentColor" strokeWidth="2" fill="none" />
+                </svg>
+              )}
             </button>
             
             {/* Compare button */}
@@ -86,9 +175,9 @@ const ProductsPage = () => {
             <div className="marketplace-product-info">
               {/* Price */}
               <div className="marketplace-price-container">
-                <span className="marketplace-current-price">{product.price} $</span>
+                <span className="marketplace-current-price">{product.price} ₽</span>
                 {product.originalPrice && (
-                  <span className="marketplace-original-price">{product.originalPrice} $</span>
+                  <span className="marketplace-original-price">{product.originalPrice} ₽</span>
                 )}
               </div>
               
@@ -100,13 +189,18 @@ const ProductsPage = () => {
               
               {/* Add to cart button */}
               <button 
-                className="marketplace-add-to-cart" 
+                className={`marketplace-add-to-cart ${addingToCart[product.id] ? 'loading' : ''}`}
                 onClick={() => addToCart(product.id)}
+                disabled={addingToCart[product.id]}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 3H5L5.4 5M5.4 5H21L17 13H7M5.4 5L7 13M7 13L5.8 16H17M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM16 20C16 20.5523 15.5523 21 15 21C14.4477 21 14 20.5523 14 20C14 19.4477 14.4477 19 15 19C15.5523 19 16 19.4477 16 20Z" 
-                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                {addingToCart[product.id] ? (
+                  <span className="btn-spinner"></span>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3H5L5.4 5M5.4 5H21L17 13H7M5.4 5L7 13M7 13L5.8 16H17M10 20C10 20.5523 9.55228 21 9 21C8.44772 21 8 20.5523 8 20C8 19.4477 8.44772 19 9 19C9.55228 19 10 19.4477 10 20ZM16 20C16 20.5523 15.5523 21 15 21C14.4477 21 14 20.5523 14 20C14 19.4477 14.4477 19 15 19C15.5523 19 16 19.4477 16 20Z" 
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
               </button>
             </div>
           </div>
