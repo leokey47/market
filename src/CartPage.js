@@ -223,7 +223,7 @@ const CartPage = () => {
                     </Col>
                     <Col xs={6} md={2} className="mb-3 mb-md-0">
                       <div className="cart-item-price">
-                        {item.price.toLocaleString()} ₽
+                        {item.price.toLocaleString()} $
                       </div>
                     </Col>
                     <Col xs={6} md={2} className="mb-3 mb-md-0">

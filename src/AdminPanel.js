@@ -332,7 +332,7 @@ function AdminPanel() {
     return (
         <div className="admin-container">
             <header className="admin-header">
-                <h1>Панель Администратора</h1>
+                <h1>Market Admin$</h1>
                 <button onClick={handleLogout} className="logout-button">
                     Выйти
                 </button>

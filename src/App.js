@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';  // Убедитесь, что эта строка НЕ закомментирована
+import 'bootstrap-icons/font/bootstrap-icons.css';  
 import ProductsPage from './ProductsPage';
+import ProductDetailPage from './ProductDetailPage';
 import LoginPage from './Login';
 import RegisterPage from './Register';
 import AdminPanel from './AdminPanel';
@@ -19,6 +20,7 @@ const App = () => {
       <div className="content-wrapper">
         <Routes>
           <Route path="/" element={<ProductsPage />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/register" element={<RegisterPage />} />

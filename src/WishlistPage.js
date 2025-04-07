@@ -190,7 +190,7 @@ const WishlistPage = () => {
                 </Card.Text>
                 <div className="d-flex justify-content-between align-items-center mt-auto">
                   <span className="wishlist-item-price fw-bold">
-                    {item.price.toLocaleString()} ₽
+                    {item.price.toLocaleString()} $
                   </span>
                   <small className="text-muted">
                     Добавлен: {new Date(item.addedAt).toLocaleDateString()}

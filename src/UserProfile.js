@@ -170,7 +170,7 @@ function UserProfile() {
     return (
         <div className="user-profile-container">
             <div className="profile-header">
-                <h1>My Profile</h1>
+                <h1></h1>
                 <button onClick={handleLogout} className="logout-button">
                     Logout
                 </button>

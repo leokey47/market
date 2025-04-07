@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CartService, WishlistService } from './ApiService'; // Импортируем сервисы API
+import { useNavigate } from 'react-router-dom';
 import './ProductsPage.css';
 
 const ProductsPage = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState({});
@@ -23,7 +25,8 @@ const ProductsPage = () => {
       });
   }, []);
 
-  const addToCart = async (productId) => {
+  const addToCart = async (e, productId) => {
+    e.stopPropagation(); // Prevent navigation when clicking the cart button
     try {
       // Проверяем наличие токена
       const token = localStorage.getItem('token');
@@ -61,7 +64,8 @@ const ProductsPage = () => {
     }
   };
 
-  const toggleFavorite = async (productId) => {
+  const toggleFavorite = async (e, productId) => {
+    e.stopPropagation(); // Prevent navigation when clicking the favorite button
     try {
       // Проверяем наличие токена
       const token = localStorage.getItem('token');
@@ -106,6 +110,10 @@ const ProductsPage = () => {
     }
   };
 
+  const navigateToProductDetail = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
   if (loading) {
     return (
       <div className="marketplace-loading">
@@ -127,7 +135,11 @@ const ProductsPage = () => {
       
       <div className="marketplace-grid">
         {products.map(product => (
-          <div key={product.id} className="marketplace-card">
+          <div 
+            key={product.id} 
+            className="marketplace-card"
+            onClick={() => navigateToProductDetail(product.id)}
+          >
             {/* Discount badge - show if there is a discount */}
             {product.originalPrice && (
               <div className="marketplace-discount-badge">
@@ -138,7 +150,7 @@ const ProductsPage = () => {
             {/* Favorite button */}
             <button 
               className={`marketplace-favorite-btn ${addingToWishlist[product.id] ? 'loading' : ''}`}
-              onClick={() => toggleFavorite(product.id)}
+              onClick={(e) => toggleFavorite(e, product.id)}
               disabled={addingToWishlist[product.id]}
               aria-label="Add to favorites"
             >
@@ -154,7 +166,8 @@ const ProductsPage = () => {
             
             {/* Compare button */}
             <button 
-              className="marketplace-compare-btn" 
+              className="marketplace-compare-btn"
+              onClick={(e) => e.stopPropagation()} 
               aria-label="Compare"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -162,7 +175,7 @@ const ProductsPage = () => {
               </svg>
             </button>
             
-            {/* Product image */}
+
             <div className="marketplace-image-container">
               <img 
                 src={product.imageUrl || 'https://via.placeholder.com/300x300'} 
@@ -171,26 +184,26 @@ const ProductsPage = () => {
               />
             </div>
             
-            {/* Product info */}
+
             <div className="marketplace-product-info">
-              {/* Price */}
+
               <div className="marketplace-price-container">
-                <span className="marketplace-current-price">{product.price} ₽</span>
+                <span className="marketplace-current-price">{product.price} $</span>
                 {product.originalPrice && (
-                  <span className="marketplace-original-price">{product.originalPrice} ₽</span>
+                  <span className="marketplace-original-price">{product.originalPrice} $</span>
                 )}
               </div>
               
-              {/* Title */}
+
               <h3 className="marketplace-product-title">{product.name}</h3>
               
-              {/* Description/Category */}
+
               <p className="marketplace-product-category">{product.category}</p>
               
-              {/* Add to cart button */}
+
               <button 
                 className={`marketplace-add-to-cart ${addingToCart[product.id] ? 'loading' : ''}`}
-                onClick={() => addToCart(product.id)}
+                onClick={(e) => addToCart(e, product.id)}
                 disabled={addingToCart[product.id]}
               >
                 {addingToCart[product.id] ? (
