@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CartService, WishlistService } from './ApiService';
 import './ProductDetailPage.css';
+// Import the custom events (adjust path as needed)
+import { cartUpdateEvent, wishlistUpdateEvent } from './CustomNavbar';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -27,6 +29,24 @@ const ProductDetailPage = () => {
   const infoRef = useRef(null);
   const actionsRef = useRef(null);
   const relatedRef = useRef(null);
+
+  // Helper function to update cart count and dispatch event
+  const updateCartCount = (increment = 1) => {
+    const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
+    const newCount = currentCount + increment;
+    localStorage.setItem('cartCount', newCount.toString());
+    // Dispatch our custom event
+    window.dispatchEvent(cartUpdateEvent);
+  };
+
+  // Helper function to update wishlist count and dispatch event
+  const updateWishlistCount = (increment = 1) => {
+    const currentCount = parseInt(localStorage.getItem('wishlistCount') || '0');
+    const newCount = currentCount + increment;
+    localStorage.setItem('wishlistCount', newCount.toString());
+    // Dispatch our custom event
+    window.dispatchEvent(wishlistUpdateEvent);
+  };
 
   // Animation timing
   useEffect(() => {
@@ -114,10 +134,8 @@ const ProductDetailPage = () => {
       // Call the API
       await CartService.addToCart(product.id, quantity);
       
-      // Update cart count in localStorage
-      const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
-      localStorage.setItem('cartCount', currentCount + quantity);
-      window.dispatchEvent(new Event('storage'));
+      // Update cart count using our helper function
+      updateCartCount(quantity);
       
       // Animated toast notification
       setStatusMessage({ type: 'success', text: 'Товар добавлен в корзину' });
@@ -149,10 +167,8 @@ const ProductDetailPage = () => {
       // Call the API
       await WishlistService.addToWishlist(product.id);
       
-      // Update wishlist count in localStorage
-      const currentCount = parseInt(localStorage.getItem('wishlistCount') || '0');
-      localStorage.setItem('wishlistCount', currentCount + 1);
-      window.dispatchEvent(new Event('storage'));
+      // Update wishlist count using our helper function
+      updateWishlistCount(1);
       
       // Create a flying heart animation
       createFlyingElement('heart');

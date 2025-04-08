@@ -2,9 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
-// Create a custom event to use for cart and wishlist updates
+// Create custom events to use for various state updates
 export const cartUpdateEvent = new Event('cartUpdate');
 export const wishlistUpdateEvent = new Event('wishlistUpdate');
+export const authStateChangeEvent = new Event('authStateChange');
+
+// Make events globally accessible for components that might be in different files
+window.cartUpdateEvent = cartUpdateEvent;
+window.wishlistUpdateEvent = wishlistUpdateEvent;
+window.authStateChangeEvent = authStateChangeEvent;
 
 const CustomNavbar = () => {
   const navigate = useNavigate();
@@ -36,11 +42,12 @@ const CustomNavbar = () => {
 
   useEffect(() => {
     // Handle auth state changes
-    const handleStorageChange = () => {
+    const handleAuthStateChange = () => {
       const role = localStorage.getItem('role');
       const token = localStorage.getItem('token');
       setUserRole(role ? role.toLowerCase() : null);
       setIsLoggedIn(!!token);
+      console.log('Auth state updated:', { isLoggedIn: !!token, role });
     };
 
     // Update cart count
@@ -69,19 +76,21 @@ const CustomNavbar = () => {
       }
     };
 
-    // Initialize counts
+    // Initialize states
+    handleAuthStateChange();
     updateCartCount();
     updateWishlistCount();
 
     // Listen for our custom events
     window.addEventListener('cartUpdate', updateCartCount);
     window.addEventListener('wishlistUpdate', updateWishlistCount);
+    window.addEventListener('authStateChange', handleAuthStateChange);
     
     // Also keep the storage event listener for changes from other tabs
     window.addEventListener('storage', (e) => {
       if (e.key === 'cartCount') updateCartCount();
       if (e.key === 'wishlistCount') updateWishlistCount();
-      if (e.key === 'token' || e.key === 'role') handleStorageChange();
+      if (e.key === 'token' || e.key === 'role') handleAuthStateChange();
     });
     
     window.addEventListener('scroll', handleScroll);
@@ -90,7 +99,8 @@ const CustomNavbar = () => {
     return () => {
       window.removeEventListener('cartUpdate', updateCartCount);
       window.removeEventListener('wishlistUpdate', updateWishlistCount);
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChange', handleAuthStateChange);
+      window.removeEventListener('storage', handleAuthStateChange);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };

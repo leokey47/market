@@ -2,14 +2,66 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-
 import './Login.css';
+
+// Custom event for auth state changes
+const authStateChangeEvent = new Event('authStateChange');
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
+
+    // Helper function to update auth state and dispatch event
+    const updateAuthState = (token, userId, userName, userRole) => {
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('username', userName);
+        localStorage.setItem('role', userRole);
+        
+        // Dispatch custom event to notify Navbar about auth state change
+        window.dispatchEvent(authStateChangeEvent);
+        
+        // Also fetch and update cart and wishlist counts if applicable
+        fetchUserCounts(token);
+    };
+    
+    // Function to fetch cart and wishlist counts after login
+    const fetchUserCounts = async (token) => {
+        try {
+            // Fetch cart count
+            const cartResponse = await axios.get('https://localhost:7209/api/Cart/count', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (cartResponse.data) {
+                localStorage.setItem('cartCount', cartResponse.data.toString());
+                // Dispatch cart update event if it exists
+                if (window.cartUpdateEvent) {
+                    window.dispatchEvent(window.cartUpdateEvent);
+                }
+            }
+            
+            // Fetch wishlist count
+            const wishlistResponse = await axios.get('https://localhost:7209/api/Wishlist/count', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (wishlistResponse.data) {
+                localStorage.setItem('wishlistCount', wishlistResponse.data.toString());
+                // Dispatch wishlist update event if it exists
+                if (window.wishlistUpdateEvent) {
+                    window.dispatchEvent(window.wishlistUpdateEvent);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching user counts:', error);
+            // Set default counts to 0 if fetch fails
+            localStorage.setItem('cartCount', '0');
+            localStorage.setItem('wishlistCount', '0');
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -19,35 +71,29 @@ function Login() {
                 password,
             });
             const token = response.data.token;
-            localStorage.setItem('token', token);
-
+            
             const decodedToken = jwtDecode(token);
             const userId = decodedToken.userId; 
             const userName = decodedToken.name; 
             const userRole = decodedToken.role;
 
             if (userId && userName) {
-                localStorage.setItem('userId', userId); 
-                localStorage.setItem('username', userName); 
-                localStorage.setItem('role', userRole); 
+                // Update auth state and trigger Navbar update
+                updateAuthState(token, userId, userName, userRole);
+                
+                if (userRole === 'admin') {
+                    navigate('/admin'); // Перенаправление в админку
+                } else {
+                    navigate('/');
+                }
             } else {
                 console.error('userId or username not found in token');
-            }
-
-            if (userRole === 'admin') {
-                navigate('/admin'); // Перенаправление в админку
-            } else {
-                navigate('/');
+                setMessage('Login failed: Invalid token data');
             }
         } catch (error) {
-            setMessage('Login failed: ' + (error.response ? error.response.data : error.message));
+            setMessage('Login failed: ' + (error.response ? error.response.data.message : error.message));
         }
     };
-
-    // const handleLogout = () => {
-    //     localStorage.clear();
-    //     navigate('/');
-    // };
 
     return (
         <div className="app-container">
@@ -99,7 +145,6 @@ function Login() {
                         {message && <p className="error-message">{message}</p>}
                         <Link to="/register" className="register-link">Register</Link>
                         <p className="forgot-password">Forgot password?</p>
-                        {/* <button onClick={handleLogout} className="logout-button">Logout</button> */}
                     </div>
                 </div>
                 <div className="creativity-message">
