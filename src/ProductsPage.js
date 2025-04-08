@@ -3,6 +3,8 @@ import axios from 'axios';
 import { CartService, WishlistService } from './ApiService'; // Импортируем сервисы API
 import { useNavigate } from 'react-router-dom';
 import './ProductsPage.css';
+// Import the custom events
+import { cartUpdateEvent, wishlistUpdateEvent } from './CustomNavbar'; // Make sure path is correct
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -25,6 +27,24 @@ const ProductsPage = () => {
       });
   }, []);
 
+  // Helper function to update cart count and dispatch event
+  const updateCartCount = (increment = 1) => {
+    const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
+    const newCount = currentCount + increment;
+    localStorage.setItem('cartCount', newCount.toString());
+    // Dispatch our custom event
+    window.dispatchEvent(cartUpdateEvent);
+  };
+
+  // Helper function to update wishlist count and dispatch event
+  const updateWishlistCount = (increment = 1) => {
+    const currentCount = parseInt(localStorage.getItem('wishlistCount') || '0');
+    const newCount = currentCount + increment;
+    localStorage.setItem('wishlistCount', newCount.toString());
+    // Dispatch our custom event
+    window.dispatchEvent(wishlistUpdateEvent);
+  };
+
   const addToCart = async (e, productId) => {
     e.stopPropagation(); // Prevent navigation when clicking the cart button
     try {
@@ -42,10 +62,8 @@ const ProductsPage = () => {
       // Реальный запрос к API
       await CartService.addToCart(productId, 1);
       
-      // Обновляем счетчик корзины в localStorage
-      const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
-      localStorage.setItem('cartCount', currentCount + 1);
-      window.dispatchEvent(new Event('storage'));
+      // Обновляем счетчик корзины используя нашу вспомогательную функцию
+      updateCartCount(1);
       
       // Показываем сообщение об успехе
       setStatusMessage({ type: 'success', text: 'Товар добавлен в корзину' });
@@ -81,10 +99,8 @@ const ProductsPage = () => {
       // Реальный запрос к API
       await WishlistService.addToWishlist(productId);
       
-      // Обновляем счетчик избранного в localStorage
-      const currentCount = parseInt(localStorage.getItem('wishlistCount') || '0');
-      localStorage.setItem('wishlistCount', currentCount + 1);
-      window.dispatchEvent(new Event('storage'));
+      // Обновляем счетчик избранного используя нашу вспомогательную функцию
+      updateWishlistCount(1);
       
       // Показываем сообщение об успехе
       setStatusMessage({ type: 'success', text: 'Товар добавлен в список желаемого' });

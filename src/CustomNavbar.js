@@ -2,14 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
+// Create a custom event to use for cart and wishlist updates
+export const cartUpdateEvent = new Event('cartUpdate');
+export const wishlistUpdateEvent = new Event('wishlistUpdate');
+
 const CustomNavbar = () => {
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState(localStorage.getItem('role') ? localStorage.getItem('role').toLowerCase() : null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const [cartCount, setCartCount] = useState(() => {
+    const count = localStorage.getItem('cartCount');
+    return count ? parseInt(count) : 0;
+  });
+  const [wishlistCount, setWishlistCount] = useState(() => {
+    const count = localStorage.getItem('wishlistCount');
+    return count ? parseInt(count) : 0;
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Add ref for dropdown menu
@@ -33,13 +43,18 @@ const CustomNavbar = () => {
       setIsLoggedIn(!!token);
     };
 
-    // Update cart and wishlist counts
-    const updateCounts = () => {
-      const cartCountFromStorage = localStorage.getItem('cartCount');
-      const wishlistCountFromStorage = localStorage.getItem('wishlistCount');
-      
-      setCartCount(cartCountFromStorage ? parseInt(cartCountFromStorage) : 0);
-      setWishlistCount(wishlistCountFromStorage ? parseInt(wishlistCountFromStorage) : 0);
+    // Update cart count
+    const updateCartCount = () => {
+      const count = localStorage.getItem('cartCount');
+      setCartCount(count ? parseInt(count) : 0);
+      console.log('Cart count updated:', count);
+    };
+
+    // Update wishlist count
+    const updateWishlistCount = () => {
+      const count = localStorage.getItem('wishlistCount');
+      setWishlistCount(count ? parseInt(count) : 0);
+      console.log('Wishlist count updated:', count);
     };
 
     // Handle scroll for navbar appearance
@@ -55,14 +70,26 @@ const CustomNavbar = () => {
     };
 
     // Initialize counts
-    updateCounts();
+    updateCartCount();
+    updateWishlistCount();
 
-    // Subscribe to events
-    window.addEventListener('storage', handleStorageChange);
+    // Listen for our custom events
+    window.addEventListener('cartUpdate', updateCartCount);
+    window.addEventListener('wishlistUpdate', updateWishlistCount);
+    
+    // Also keep the storage event listener for changes from other tabs
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'cartCount') updateCartCount();
+      if (e.key === 'wishlistCount') updateWishlistCount();
+      if (e.key === 'token' || e.key === 'role') handleStorageChange();
+    });
+    
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
+      window.removeEventListener('cartUpdate', updateCartCount);
+      window.removeEventListener('wishlistUpdate', updateWishlistCount);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);

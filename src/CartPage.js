@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import './CartPage.css';
+// Import the custom event
+import { cartUpdateEvent } from './CustomNavbar'; // Make sure path is correct
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -22,6 +24,13 @@ const CartPage = () => {
     const total = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
     setTotalAmount(total);
   }, [cartItems]);
+
+  // Helper function to update cart count and dispatch event
+  const updateCartCount = (count) => {
+    localStorage.setItem('cartCount', count.toString());
+    // Dispatch our custom event
+    window.dispatchEvent(cartUpdateEvent);
+  };
 
   const fetchCartItems = async () => {
     setLoading(true);
@@ -47,9 +56,8 @@ const CartPage = () => {
       setCartItems(response.data);
       setError(null);
       
-      // Update cart count in navbar
-      localStorage.setItem('cartCount', response.data.length);
-      window.dispatchEvent(new Event('storage'));
+      // Update cart count in navbar using our helper
+      updateCartCount(response.data.length);
     } catch (err) {
       console.error('Error fetching cart items:', err);
       setError('Ошибка при загрузке корзины. Пожалуйста, попробуйте еще раз.');
@@ -105,11 +113,11 @@ const CartPage = () => {
       });
 
       // Remove item from local state
-      setCartItems(cartItems.filter(item => item.cartItemId !== cartItemId));
+      const updatedItems = cartItems.filter(item => item.cartItemId !== cartItemId);
+      setCartItems(updatedItems);
       
-      // Update cart count in navbar
-      localStorage.setItem('cartCount', cartItems.length - 1);
-      window.dispatchEvent(new Event('storage'));
+      // Update cart count in navbar using our helper
+      updateCartCount(updatedItems.length);
     } catch (err) {
       console.error('Error removing cart item:', err);
       setError('Ошибка при удалении товара из корзины. Пожалуйста, попробуйте еще раз.');
@@ -134,9 +142,8 @@ const CartPage = () => {
       // Clear local state
       setCartItems([]);
       
-      // Update cart count in navbar
-      localStorage.setItem('cartCount', 0);
-      window.dispatchEvent(new Event('storage'));
+      // Update cart count in navbar using our helper
+      updateCartCount(0);
     } catch (err) {
       console.error('Error clearing cart:', err);
       setError('Ошибка при очистке корзины. Пожалуйста, попробуйте еще раз.');

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import './WishlistPage.css';
+// Import the custom events
+import { wishlistUpdateEvent, cartUpdateEvent } from './CustomNavbar'; // Make sure path is correct
 
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -15,6 +17,21 @@ const WishlistPage = () => {
   useEffect(() => {
     fetchWishlistItems();
   }, []);
+
+  // Helper function to update wishlist count and dispatch event
+  const updateWishlistCount = (count) => {
+    localStorage.setItem('wishlistCount', count.toString());
+    // Dispatch our custom event
+    window.dispatchEvent(wishlistUpdateEvent);
+  };
+
+  // Helper function to update cart count and dispatch event
+  const updateCartCount = (count) => {
+    const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
+    localStorage.setItem('cartCount', (currentCount + count).toString());
+    // Dispatch our custom event
+    window.dispatchEvent(cartUpdateEvent);
+  };
 
   const fetchWishlistItems = async () => {
     setLoading(true);
@@ -35,9 +52,8 @@ const WishlistPage = () => {
       setWishlistItems(response.data);
       setError(null);
       
-      // Update wishlist count in navbar
-      localStorage.setItem('wishlistCount', response.data.length);
-      window.dispatchEvent(new Event('storage'));
+      // Update wishlist count in navbar using our helper
+      updateWishlistCount(response.data.length);
     } catch (err) {
       console.error('Error fetching wishlist items:', err);
       setError('Ошибка при загрузке списка желаемого. Пожалуйста, попробуйте еще раз.');
@@ -57,11 +73,11 @@ const WishlistPage = () => {
       });
 
       // Remove item from local state
-      setWishlistItems(wishlistItems.filter(item => item.wishlistItemId !== wishlistItemId));
+      const updatedItems = wishlistItems.filter(item => item.wishlistItemId !== wishlistItemId);
+      setWishlistItems(updatedItems);
       
-      // Update wishlist count in navbar
-      localStorage.setItem('wishlistCount', wishlistItems.length - 1);
-      window.dispatchEvent(new Event('storage'));
+      // Update wishlist count in navbar using our helper
+      updateWishlistCount(updatedItems.length);
     } catch (err) {
       console.error('Error removing wishlist item:', err);
       setError('Ошибка при удалении товара из списка желаемого. Пожалуйста, попробуйте еще раз.');
@@ -81,13 +97,12 @@ const WishlistPage = () => {
       });
 
       // Remove item from local state
-      setWishlistItems(wishlistItems.filter(item => item.wishlistItemId !== wishlistItemId));
+      const updatedItems = wishlistItems.filter(item => item.wishlistItemId !== wishlistItemId);
+      setWishlistItems(updatedItems);
       
-      // Update counts in navbar
-      localStorage.setItem('wishlistCount', wishlistItems.length - 1);
-      const cartCount = parseInt(localStorage.getItem('cartCount') || '0');
-      localStorage.setItem('cartCount', cartCount + 1);
-      window.dispatchEvent(new Event('storage'));
+      // Update counts in navbar using our helpers
+      updateWishlistCount(updatedItems.length);
+      updateCartCount(1); // Increment cart by 1
     } catch (err) {
       console.error('Error moving item to cart:', err);
       setError('Ошибка при перемещении товара в корзину. Пожалуйста, попробуйте еще раз.');
@@ -110,9 +125,8 @@ const WishlistPage = () => {
       // Clear local state
       setWishlistItems([]);
       
-      // Update wishlist count in navbar
-      localStorage.setItem('wishlistCount', 0);
-      window.dispatchEvent(new Event('storage'));
+      // Update wishlist count in navbar using our helper
+      updateWishlistCount(0);
     } catch (err) {
       console.error('Error clearing wishlist:', err);
       setError('Ошибка при очистке списка желаемого. Пожалуйста, попробуйте еще раз.');
