@@ -20,15 +20,15 @@ const CartPage = () => {
   }, []);
 
   useEffect(() => {
-    // Calculate total amount whenever cart items change
+   
     const total = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
     setTotalAmount(total);
   }, [cartItems]);
 
-  // Helper function to update cart count and dispatch event
+  
   const updateCartCount = (count) => {
     localStorage.setItem('cartCount', count.toString());
-    // Dispatch our custom event
+    
     window.dispatchEvent(cartUpdateEvent);
   };
 
@@ -42,7 +42,7 @@ const CartPage = () => {
         return;
       }
 
-      // Корректная настройка запроса
+      
       const response = await axios({
         method: 'get',
         url: `${API_URL}/api/Cart`,
