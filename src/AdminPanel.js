@@ -19,12 +19,15 @@ function AdminPanel() {
         price: 0,
         imageUrl: '',
         category: '',
+        additionalPhotos: ['', '', '', ''], 
+        specifications: [{ name: '', value: '' }], 
     });
     const [isUploading, setIsUploading] = useState(false);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(null);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Проверка роли пользователя при загрузке страницы
+    
     useEffect(() => {
         const token = localStorage.getItem('token');
         const storedRole = localStorage.getItem('role');
@@ -38,13 +41,13 @@ function AdminPanel() {
         fetchProducts();
     }, [navigate]);
 
-    // Извлечение уникальных категорий из списка продуктов
+    
     useEffect(() => {
         const uniqueCategories = [...new Set(products.map(product => product.category))];
         setCategories(uniqueCategories);
     }, [products]);
 
-    // Получение списка продуктов
+    
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
@@ -57,26 +60,23 @@ function AdminPanel() {
         }
     };
 
-    // Обработчик ошибок API
+    
     const handleApiError = (error, prefix = 'Ошибка') => {
         if (error.response) {
-            // Сервер ответил с кодом статуса вне диапазона 2xx
             console.error("Error data:", error.response.data);
             console.error("Error status:", error.response.status);
             const errorMessage = error.response.data?.message || JSON.stringify(error.response.data) || error.message;
             setError(`${prefix}: ${error.response.status} - ${errorMessage}`);
         } else if (error.request) {
-            // Запрос был сделан, но ответ не получен
             console.error("No response received:", error.request);
             setError(`${prefix}: Сервер не отвечает`);
         } else {
-            // Что-то произошло при настройке запроса
             console.error('Error message:', error.message);
             setError(`${prefix}: ${error.message}`);
         }
     };
 
-    // Обработчик изменения значений в форме
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormProduct((prevProduct) => ({
@@ -85,12 +85,52 @@ function AdminPanel() {
         }));
     };
 
-    // Обработчик загрузки изображения
-    const handleFileUpload = async (event) => {
+    
+    const handleAdditionalPhotoChange = (index, url) => {
+        const newAdditionalPhotos = [...formProduct.additionalPhotos];
+        newAdditionalPhotos[index] = url;
+        setFormProduct(prev => ({
+            ...prev,
+            additionalPhotos: newAdditionalPhotos
+        }));
+    };
+
+    
+    const handleSpecificationChange = (index, field, value) => {
+        const newSpecs = [...formProduct.specifications];
+        newSpecs[index] = { ...newSpecs[index], [field]: value };
+        setFormProduct(prev => ({
+            ...prev,
+            specifications: newSpecs
+        }));
+    };
+
+    
+    const handleAddSpecification = () => {
+        setFormProduct(prev => ({
+            ...prev,
+            specifications: [...prev.specifications, { name: '', value: '' }]
+        }));
+    };
+
+    
+    const handleRemoveSpecification = (index) => {
+        const newSpecs = [...formProduct.specifications];
+        newSpecs.splice(index, 1);
+        setFormProduct(prev => ({
+            ...prev,
+            specifications: newSpecs
+        }));
+    };
+
+    
+    const handleFileUpload = async (event, photoIndex = null) => {
         const file = event.target.files[0];
         if (!file) return;
 
         setIsUploading(true);
+        setCurrentPhotoIndex(photoIndex);
+
         const formData = new FormData();
         formData.append("file", file);
 
@@ -104,38 +144,63 @@ function AdminPanel() {
                 },
             });
 
-            setFormProduct((prevProduct) => ({
-                ...prevProduct,
-                imageUrl: response.data.imageUrl,
-            }));
+            if (photoIndex === null) {
+                
+                setFormProduct(prev => ({
+                    ...prev,
+                    imageUrl: response.data.imageUrl
+                }));
+            } else {
+                
+                handleAdditionalPhotoChange(photoIndex, response.data.imageUrl);
+            }
         } catch (error) {
             handleApiError(error, 'Ошибка загрузки изображения');
         } finally {
             setIsUploading(false);
+            setCurrentPhotoIndex(null);
         }
     };
 
-    // Начало редактирования товара
+    
     const handleEditProduct = (product) => {
         setIsEditing(true);
         setCurrentProductId(product.id);
+        
+        
+        const mainImageUrl = product.imageUrl;
+        const additionalPhotos = product.photos
+            .filter(photo => photo.displayOrder > 1)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map(photo => photo.imageUrl);
+        
+        
+        const paddedAdditionalPhotos = [...additionalPhotos];
+        while (paddedAdditionalPhotos.length < 4) {
+            paddedAdditionalPhotos.push('');
+        }
+        
         setFormProduct({
-            id: product.id, // Обязательно добавляем id в formProduct для редактирования
+            id: product.id,
             name: product.name,
             description: product.description,
             price: product.price,
-            imageUrl: product.imageUrl,
+            imageUrl: mainImageUrl,
             category: product.category,
+            additionalPhotos: paddedAdditionalPhotos,
+            specifications: product.specifications.length > 0 
+                ? product.specifications.map(spec => ({ name: spec.name, value: spec.value }))
+                : [{ name: '', value: '' }]
         });
         
-        // Прокрутка к форме
+     
         const formElement = document.getElementById('productForm');
         if (formElement) {
             formElement.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
-    // Отмена редактирования
+   
     const handleCancelEdit = () => {
         setIsEditing(false);
         setCurrentProductId(null);
@@ -145,10 +210,12 @@ function AdminPanel() {
             price: 0,
             imageUrl: '',
             category: '',
+            additionalPhotos: ['', '', '', ''],
+            specifications: [{ name: '', value: '' }]
         });
     };
 
-    // Проверка данных формы перед отправкой
+    
     const validateForm = () => {
         if (!formProduct.name.trim()) {
             setError("Название товара не может быть пустым");
@@ -171,14 +238,22 @@ function AdminPanel() {
         }
         
         if (!formProduct.imageUrl) {
-            setError("Необходимо загрузить изображение");
+            setError("Необходимо загрузить главное изображение");
             return false;
+        }
+        
+       
+        for (const spec of formProduct.specifications) {
+            if ((spec.name && !spec.value) || (!spec.name && spec.value)) {
+                setError("Для каждой характеристики должны быть заполнены и название, и значение");
+                return false;
+            }
         }
         
         return true;
     };
 
-    // Сохранение товара (добавление или обновление)
+    
     const handleSaveProduct = async (e) => {
         e.preventDefault();
         setError('');
@@ -189,22 +264,35 @@ function AdminPanel() {
 
         const token = localStorage.getItem("token");
         
+        
+        const validSpecs = formProduct.specifications.filter(
+            spec => spec.name.trim() && spec.value.trim()
+        );
+        
+        
+        const validAdditionalPhotos = formProduct.additionalPhotos.filter(url => url.trim());
+        
+       
+        const productData = {
+            ...formProduct,
+            specifications: validSpecs,
+            additionalPhotos: validAdditionalPhotos
+        };
+        
+        if (isEditing) {
+            productData.id = currentProductId;
+        }
+        
         try {
             let response;
             
             if (isEditing) {
-                // Обновление существующего товара
-                // Убедимся, что id включен в отправляемые данные
-                const productToUpdate = {
-                    ...formProduct,
-                    id: currentProductId // Явно устанавливаем id
-                };
                 
-                console.log("Updating product with data:", productToUpdate);
+                console.log("Updating product with data:", productData);
                 
                 response = await axios.put(
                     `https://localhost:7209/api/Product/${currentProductId}`, 
-                    productToUpdate, 
+                    productData, 
                     {
                         headers: { 
                             "Content-Type": "application/json",
@@ -213,34 +301,32 @@ function AdminPanel() {
                     }
                 );
                 
-                console.log("API response for updated product:", response.data);
                 
-                // Более безопасное обновление состояния
+                const updatedProductResponse = await axios.get(
+                    `https://localhost:7209/api/Product/${currentProductId}`,
+                    {
+                        headers: { 
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+                
+                
                 setProducts(prevProducts => 
                     prevProducts.map(product => {
                         if (product.id === currentProductId) {
-                            const updatedProduct = {
-                                ...product, // Сохраняем существующие свойства как резервные
-                                ...response.data, // Добавляем обновленные свойства
-                                // Явно обеспечиваем наличие необходимых полей
-                                id: response.data.id || currentProductId,
-                                name: response.data.name || formProduct.name,
-                                description: response.data.description || formProduct.description,
-                                price: response.data.price || formProduct.price,
-                                imageUrl: response.data.imageUrl || formProduct.imageUrl,
-                                category: response.data.category || formProduct.category
-                            };
-                            return updatedProduct;
+                            return updatedProductResponse.data;
                         }
                         return product;
                     })
                 );
+                
                 setSuccessMessage('Товар успешно обновлен!');
             } else {
-                // Добавление нового товара
+               
                 response = await axios.post(
                     'https://localhost:7209/api/Product', 
-                    formProduct, 
+                    productData, 
                     {
                         headers: { 
                             "Content-Type": "application/json",
@@ -249,20 +335,8 @@ function AdminPanel() {
                     }
                 );
                 
-                console.log("API response for new product:", response.data);
-                
-                // Убедимся, что у нового продукта есть все необходимые поля
-                const newProduct = {
-                    ...formProduct,
-                    id: response.data.id, // Получаем ID от сервера
-                    name: response.data.name || formProduct.name,
-                    description: response.data.description || formProduct.description,
-                    price: response.data.price || formProduct.price,
-                    imageUrl: response.data.imageUrl || formProduct.imageUrl,
-                    category: response.data.category || formProduct.category
-                };
-                
-                setProducts(prevProducts => [...prevProducts, newProduct]);
+                // Add the new product to the state
+                setProducts(prevProducts => [...prevProducts, response.data]);
                 setSuccessMessage('Товар успешно добавлен!');
             }
             
@@ -295,7 +369,6 @@ function AdminPanel() {
             setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
             setSuccessMessage('Товар успешно удален!');
             
-            // Очистка сообщения об успехе через 3 секунды
             setTimeout(() => setSuccessMessage(''), 3000);
             
         } catch (error) {
@@ -310,9 +383,8 @@ function AdminPanel() {
         navigate('/login');
     };
 
-    // Фильтрация продуктов по поиску и категории с проверкой на наличие полей
+    // Фильтрация продуктов по поиску и категории
     const filteredProducts = products.filter(product => {
-        // Проверка наличия необходимых полей
         if (!product || !product.name || !product.description) {
             console.error("Invalid product in list:", product);
             return false; // Пропускаем этот продукт
@@ -424,15 +496,17 @@ function AdminPanel() {
                         </div>
                         <div className="form-group">
                             <label>
-                                Изображение
+                                Главное изображение
                             </label>
                             <div className="file-upload">
                                 <input
                                     type="file"
-                                    onChange={handleFileUpload}
+                                    onChange={(e) => handleFileUpload(e, null)}
                                     accept="image/*"
                                 />
-                                {isUploading && <span className="upload-status">Загрузка...</span>}
+                                {isUploading && currentPhotoIndex === null && 
+                                    <span className="upload-status">Загрузка...</span>
+                                }
                             </div>
                         </div>
                     </div>
@@ -440,7 +514,7 @@ function AdminPanel() {
                     {formProduct.imageUrl && (
                         <div className="form-group">
                             <label>
-                                Предпросмотр изображения
+                                Предпросмотр главного изображения
                             </label>
                             <div className="image-preview">
                                 <img 
@@ -450,6 +524,89 @@ function AdminPanel() {
                             </div>
                         </div>
                     )}
+
+                    {/* Дополнительные фотографии */}
+                    <div className="additional-photos-section">
+                        <h3>Дополнительные фотографии (максимум 4)</h3>
+                        <div className="additional-photos-grid">
+                            {formProduct.additionalPhotos.map((photoUrl, index) => (
+                                <div key={index} className="additional-photo-item">
+                                    <div className="form-group">
+                                        <label>Фото {index + 1}</label>
+                                        <div className="file-upload">
+                                            <input
+                                                type="file"
+                                                onChange={(e) => handleFileUpload(e, index)}
+                                                accept="image/*"
+                                            />
+                                            {isUploading && currentPhotoIndex === index && 
+                                                <span className="upload-status">Загрузка...</span>
+                                            }
+                                        </div>
+                                        
+                                        {photoUrl && (
+                                            <div className="image-preview small">
+                                                <img src={photoUrl} alt={`Фото ${index + 1}`} />
+                                                <button 
+                                                    type="button" 
+                                                    className="remove-photo" 
+                                                    onClick={() => handleAdditionalPhotoChange(index, '')}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    {/* Характеристики товара */}
+                    <div className="specifications-section">
+                        <h3>Характеристики товара</h3>
+                        {formProduct.specifications.map((spec, index) => (
+                            <div key={index} className="specification-item">
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label>Название характеристики</label>
+                                        <input
+                                            type="text"
+                                            value={spec.name}
+                                            onChange={(e) => handleSpecificationChange(index, 'name', e.target.value)}
+                                            placeholder="Например: Размер, Цвет, Материал..."
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Значение</label>
+                                        <input
+                                            type="text"
+                                            value={spec.value}
+                                            onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
+                                            placeholder="Например: XL, Красный, Хлопок..."
+                                        />
+                                    </div>
+                                    <div className="form-group action-buttons">
+                                        <button 
+                                            type="button" 
+                                            className="remove-spec" 
+                                            onClick={() => handleRemoveSpecification(index)}
+                                            disabled={formProduct.specifications.length <= 1}
+                                        >
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        <button 
+                            type="button" 
+                            className="add-spec-button" 
+                            onClick={handleAddSpecification}
+                        >
+                            + Добавить характеристику
+                        </button>
+                    </div>
                     
                     <div className="form-actions">
                         {isEditing && (
@@ -510,12 +667,28 @@ function AdminPanel() {
                                     ) : (
                                         <div className="no-image">Нет изображения</div>
                                     )}
+                                    {product.photos && product.photos.length > 1 && (
+                                        <div className="photo-count">+{product.photos.length - 1} фото</div>
+                                    )}
                                 </div>
                                 <div className="product-info">
                                     <h3>{product.name}</h3>
                                     <p className="product-category">{product.category}</p>
                                     <p className="product-price">{product.price.toFixed(2)} $</p>
                                     <div className="product-description">{product.description}</div>
+                                    
+                                    {product.specifications && product.specifications.length > 0 && (
+                                        <div className="product-specs">
+                                            <h4>Характеристики:</h4>
+                                            <ul>
+                                                {product.specifications.map((spec, index) => (
+                                                    <li key={index}>
+                                                        <strong>{spec.name}:</strong> {spec.value}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="product-actions">
                                     <button 

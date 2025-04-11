@@ -22,6 +22,8 @@ const ProductDetailPage = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [animateElements, setAnimateElements] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
   
   // Refs for animation targets
   const headerRef = useRef(null);
@@ -79,6 +81,7 @@ const ProductDetailPage = () => {
     setQuantity(1);
     setStatusMessage(null);
     setActiveTab('description');
+    setCurrentImageIndex(0);
     
     // Fetch product details
     axios.get(`https://localhost:7209/api/Product/${id}`)
@@ -103,6 +106,29 @@ const ProductDetailPage = () => {
         setStatusMessage({ type: 'error', text: 'Ошибка при загрузке товара' });
       });
   }, [id, product?.category]);
+
+  // Get all product photos including the main one
+  const getAllProductPhotos = () => {
+    if (!product) return [];
+    
+    // Start with the main image
+    const photos = [{ imageUrl: product.imageUrl, displayOrder: 0 }];
+    
+    // Add additional photos if available
+    if (product.photos && product.photos.length > 0) {
+      // Sort photos by displayOrder
+      const sortedPhotos = [...product.photos].sort((a, b) => a.displayOrder - b.displayOrder);
+      // Add to our photos array, but avoid duplicating the main image
+      sortedPhotos.forEach(photo => {
+        // Only add if not the same as the main image
+        if (photo.imageUrl !== product.imageUrl) {
+          photos.push(photo);
+        }
+      });
+    }
+    
+    return photos;
+  };
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -250,12 +276,29 @@ const ProductDetailPage = () => {
   };
 
   const handleImageClick = () => {
+    setModalImageIndex(currentImageIndex);
     setShowImageModal(true);
   };
 
   const handleZoomToggle = (e) => {
     e.stopPropagation();
     setImageZoomed(!imageZoomed);
+  };
+
+  const handleThumbnailClick = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  const handleNextModalImage = (e) => {
+    e.stopPropagation();
+    const photos = getAllProductPhotos();
+    setModalImageIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const handlePrevModalImage = (e) => {
+    e.stopPropagation();
+    const photos = getAllProductPhotos();
+    setModalImageIndex((prev) => (prev - 1 + photos.length) % photos.length);
   };
 
   if (loading) {
@@ -286,6 +329,10 @@ const ProductDetailPage = () => {
     );
   }
 
+  // Get all photos for the product
+  const allPhotos = getAllProductPhotos();
+  const currentPhoto = allPhotos[currentImageIndex]?.imageUrl || product.imageUrl;
+
   return (
     <>
       <div className={`product-detail-container ${animateElements ? 'animate' : ''}`}>
@@ -293,7 +340,7 @@ const ProductDetailPage = () => {
         <div className={`product-detail-floating-header ${hasScrolled ? 'visible' : ''}`} ref={headerRef}>
           <div className="product-detail-floating-content">
             <div className="product-detail-floating-image">
-              <img src={product.imageUrl || 'https://via.placeholder.com/80x80'} alt={product.name} />
+              <img src={currentPhoto} alt={product.name} />
             </div>
             <div className="product-detail-floating-info">
               <h3>{product.name}</h3>
@@ -356,7 +403,7 @@ const ProductDetailPage = () => {
                 </div>
               )}
               <img 
-                src={product.imageUrl || 'https://via.placeholder.com/600x600'} 
+                src={currentPhoto} 
                 alt={product.name}
                 className="product-detail-image"
                 onLoad={handleImageLoad}
@@ -383,18 +430,50 @@ const ProductDetailPage = () => {
                   {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                 </div>
               )}
+              
+              {/* Photo navigation arrows if there are multiple photos */}
+              {allPhotos.length > 1 && (
+                <>
+                  <button 
+                    className="product-detail-image-nav prev"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex((prev) => (prev - 1 + allPhotos.length) % allPhotos.length);
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24">
+                      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor" />
+                    </svg>
+                  </button>
+                  <button 
+                    className="product-detail-image-nav next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex((prev) => (prev + 1) % allPhotos.length);
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24">
+                      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
 
-            {/* Image thumbnails would go here if there were multiple images */}
-            <div className="product-detail-thumbnails">
-              <div className="product-detail-thumbnail active">
-                <img src={product.imageUrl || 'https://via.placeholder.com/100x100'} alt={product.name} />
+            {/* Image thumbnails */}
+            {allPhotos.length > 1 && (
+              <div className="product-detail-thumbnails">
+                {allPhotos.map((photo, index) => (
+                  <div 
+                    key={index} 
+                    className={`product-detail-thumbnail ${currentImageIndex === index ? 'active' : ''}`}
+                    onClick={() => handleThumbnailClick(index)}
+                  >
+                    <img src={photo.imageUrl} alt={`${product.name} - изображение ${index + 1}`} />
+                  </div>
+                ))}
               </div>
-              {/* Placeholder thumbnails for demonstration */}
-              <div className="product-detail-thumbnail placeholder"></div>
-              <div className="product-detail-thumbnail placeholder"></div>
-              <div className="product-detail-thumbnail placeholder"></div>
-            </div>
+            )}
           </div>
 
           {/* Right side - Product Info with animations */}
@@ -470,7 +549,20 @@ const ProductDetailPage = () => {
                     <li><span>Артикул:</span> {product.id}</li>
                     <li><span>Цена:</span> ${product.price}</li>
                     <li><span>В наличии:</span> <span className="in-stock">Да</span></li>
-                    <li><span>Гарантия:</span> 12 месяцев</li>
+                    
+                    {/* Отображаем характеристики продукта, если они есть */}
+                    {product.specifications && product.specifications.length > 0 && 
+                      product.specifications.map((spec, index) => (
+                        <li key={index}>
+                          <span>{spec.name}:</span> {spec.value}
+                        </li>
+                      ))
+                    }
+                    
+                    {/* Если характеристик нет, отображаем стандартную гарантию */}
+                    {(!product.specifications || product.specifications.length === 0) && (
+                      <li><span>Гарантия:</span> 12 месяцев</li>
+                    )}
                   </ul>
                 </div>
               )}
@@ -617,10 +709,27 @@ const ProductDetailPage = () => {
           </button>
           <div className="modal-image-container" onClick={(e) => e.stopPropagation()}>
             <img 
-              src={product.imageUrl || 'https://via.placeholder.com/800x800'} 
+              src={allPhotos[modalImageIndex]?.imageUrl || product.imageUrl} 
               alt={product.name}
               className="modal-image"
             />
+            
+            {/* Add navigation buttons if there are multiple photos */}
+            {allPhotos.length > 1 && (
+              <div className="modal-navigation">
+                <button className="modal-nav-btn prev" onClick={handlePrevModalImage}>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor" />
+                  </svg>
+                </button>
+                <div className="modal-counter">{modalImageIndex + 1} / {allPhotos.length}</div>
+                <button className="modal-nav-btn next" onClick={handleNextModalImage}>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

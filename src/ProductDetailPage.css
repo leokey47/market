@@ -1233,3 +1233,237 @@
       font-size: 0.875rem;
     }
   }
+
+  /* Дополнительные стили для галереи изображений и характеристик */
+
+/* Стили для навигации по изображениям */
+.product-detail-image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition: all var(--transition-fast) ease;
+  z-index: 2;
+}
+
+.product-detail-image-container:hover .product-detail-image-nav {
+  opacity: 0.8;
+}
+
+.product-detail-image-nav:hover {
+  opacity: 1;
+  background-color: var(--light-gray);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.product-detail-image-nav.prev {
+  left: 10px;
+}
+
+.product-detail-image-nav.next {
+  right: 10px;
+}
+
+.product-detail-image-nav svg {
+  width: 24px;
+  height: 24px;
+  color: var(--text-color);
+}
+
+/* Улучшенные стили для миниатюр */
+.product-detail-thumbnails {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  max-width: 100%;
+}
+
+.product-detail-thumbnails::-webkit-scrollbar {
+  height: 4px;
+}
+
+.product-detail-thumbnails::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: 10px;
+}
+
+.product-detail-thumbnails::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 10px;
+}
+
+.product-detail-thumbnail {
+  min-width: 60px;
+  height: 60px;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast) ease;
+  opacity: 0.7;
+}
+
+.product-detail-thumbnail:hover {
+  opacity: 0.9;
+  transform: translateY(-3px);
+}
+
+.product-detail-thumbnail.active {
+  border-color: var(--primary-color);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.product-detail-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Модальное окно с галереей */
+.modal-navigation {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.modal-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast) ease;
+}
+
+.modal-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-nav-btn svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.modal-counter {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 5px 12px;
+}
+
+
+.product-detail-specs li {
+  display: flex;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.product-detail-specs li span:first-child {
+  width: 40%;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.product-detail-specs li span:last-child {
+  flex: 1;
+}
+
+
+.product-detail-image-indicator {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 4px 10px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity var(--transition-fast) ease;
+  z-index: 2;
+}
+
+.product-detail-image-container:hover .product-detail-image-indicator {
+  opacity: 1;
+}
+
+
+@media (max-width: 768px) {
+  .product-detail-thumbnails {
+    justify-content: center;
+  }
+  
+  .product-detail-image-nav {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .product-detail-image-nav svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .product-detail-specs li span:first-child {
+    width: 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-detail-thumbnail {
+    min-width: 50px;
+    height: 50px;
+  }
+  
+  .modal-navigation {
+    bottom: 10px;
+    gap: 10px;
+  }
+  
+  .modal-nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .modal-counter {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  
+  .product-detail-specs li {
+    flex-direction: column;
+    padding: 8px 0;
+  }
+  
+  .product-detail-specs li span:first-child {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+}
