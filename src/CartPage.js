@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import './CartPage.css';
+import { useNavigate } from 'react-router-dom';
 // Import the custom event
 import { cartUpdateEvent } from './CustomNavbar'; // Make sure path is correct
 
@@ -11,6 +12,7 @@ const CartPage = () => {
   const [error, setError] = useState(null);
   const [updateLoading, setUpdateLoading] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
+  const navigate = useNavigate();
   
   // Используем явный URL бэкенда
   const API_URL = 'https://localhost:7209';
@@ -151,8 +153,8 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    // This would be implemented to redirect to a checkout page
-    alert('Переход к оформлению заказа. Эта функция будет реализована позже.');
+    
+    navigate('/checkout');
   };
 
   if (loading) {

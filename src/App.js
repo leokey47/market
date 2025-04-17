@@ -10,6 +10,11 @@ import AdminPanel from './AdminPanel';
 import UserProfile from './UserProfile';
 import CartPage from './CartPage';
 import WishlistPage from './WishlistPage';
+import CheckoutPage from './CheckoutPage';
+import OrdersPage from './OrdersPage';
+import OrderStatusPage from './OrderStatusPage';
+import PaymentSuccessPage from './PaymentSuccessPage';
+import PaymentCancelPage from './PaymentCancelPage';
 import CustomNavbar from './CustomNavbar';
 import './App.css';
 
@@ -27,6 +32,11 @@ const App = () => {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:orderId" element={<OrderStatusPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/cancel" element={<PaymentCancelPage />} />
         </Routes>
       </div>
     </Router>

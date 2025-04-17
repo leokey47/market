@@ -137,6 +137,18 @@ const CustomNavbar = () => {
     navigate('/admin');
   };
 
+  const handleNavigateToOrders = () => {
+    console.log('Navigating to orders...');
+    setIsDropdownOpen(false);
+    navigate('/orders');
+  };
+
+  const handleNavigateToCheckout = () => {
+    console.log('Navigating to checkout...');
+    setIsDropdownOpen(false);
+    navigate('/checkout');
+  };
+
   return (
     <header className={`header ${scrolled ? 'header-scrolled' : ''}`}>
       <nav className="navbar">
@@ -164,6 +176,7 @@ const CustomNavbar = () => {
                   Главная
                 </Link>
               </li>
+              
             </ul>
 
             {/* Right Side Icons and Auth */}
@@ -212,6 +225,20 @@ const CustomNavbar = () => {
                         onClick={handleNavigateToProfile}
                       >
                         Профиль
+                      </button>
+                      <button 
+                        type="button"
+                        className="dropdown-item"
+                        onClick={handleNavigateToOrders}
+                      >
+                        Мои заказы
+                      </button>
+                      <button 
+                        type="button"
+                        className="dropdown-item"
+                        onClick={handleNavigateToCheckout}
+                      >
+                        Оформить заказ
                       </button>
                       {userRole === 'admin' && (
                         <button 
