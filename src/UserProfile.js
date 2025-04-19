@@ -1,59 +1,105 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './UserProfile.css'; // Don't forget to create this CSS file
+import './UserProfile.css';
+import { apiClient } from './ApiService'; // Adjust path as needed
 
 function UserProfile() {
     const [user, setUser] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         username: '',
         email: ''
     });
+    const [avatarUrl, setAvatarUrl] = useState('');
+    const [imageFile, setImageFile] = useState(null);
+    const [uploadStatus, setUploadStatus] = useState('');
     const navigate = useNavigate();
 
+    // Fetch user profile from API
     useEffect(() => {
-        fetchUserData();
-    }, []);
-
-    const fetchUserData = () => {
-        const token = localStorage.getItem('token');
-        const userId = localStorage.getItem('userId');
-       
-        if (!token || !userId) {
-            navigate('/login');
-            return;
-        }
-
-        setIsLoading(true);
-        axios.get(`https://localhost:7209/api/User/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(response => {
-            setUser(response.data);
-            setFormData({
-                username: response.data.username,
-                email: response.data.email
-            });
-            setIsLoading(false);
-        })
-        .catch(error => {
-            console.error('Error fetching user data:', error);
-            setIsLoading(false);
-            navigate('/login');
-        });
-    };
+        const fetchUserProfile = async () => {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            
+            if (!token || !userId) {
+                console.log('Нет токена или userId, перенаправление на страницу входа');
+                navigate('/login');
+                return;
+            }
+            
+            try {
+                const response = await apiClient.get(`/api/User/${userId}`);
+                
+                if (response.data) {
+                    console.log('Получены данные пользователя:', response.data);
+                    setUser(response.data);
+                    setFormData({
+                        username: response.data.username || '',
+                        email: response.data.email || ''
+                    });
+                    setAvatarUrl(response.data.profileImageUrl || '');
+                }
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Ошибка при получении профиля пользователя:', error);
+                
+                // Используем данные из localStorage, если API недоступен
+                const username = localStorage.getItem('username');
+                const email = localStorage.getItem('userEmail') || 'example@example.com';
+                const profileImage = localStorage.getItem('profileImage') || '';
+                
+                setUser({
+                    userId: userId,
+                    username: username || 'Пользователь',
+                    email: email,
+                    role: localStorage.getItem('role') || 'user',
+                    createdAt: new Date().toISOString(),
+                    profileImageUrl: profileImage
+                });
+                
+                setFormData({
+                    username: username || 'Пользователь',
+                    email: email
+                });
+                
+                setAvatarUrl(profileImage);
+                setError('Не удалось загрузить профиль из API, используются кэшированные данные');
+                setIsLoading(false);
+            }
+        };
+        
+        fetchUserProfile();
+    }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('profileImage');
+        localStorage.removeItem('cartCount');
+        localStorage.removeItem('wishlistCount');
+        
+        const authStateChangeEvent = new Event('authStateChange');
+        window.dispatchEvent(authStateChangeEvent);
+        
         navigate('/login');
     };
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
+        
+        if (isEditing && user) {
+            setFormData({
+                username: user.username,
+                email: user.email
+            });
+            setAvatarUrl(user.profileImageUrl || '');
+            setImageFile(null);
+        }
     };
 
     const handleInputChange = (e) => {
@@ -63,87 +109,101 @@ function UserProfile() {
         });
     };
 
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            
+            // Проверяем, что файл - изображение
+            if (!file.type.startsWith('image/')) {
+                setUploadStatus('Ошибка: выбранный файл не является изображением');
+                return;
+            }
+            
+            // Проверяем размер файла (не более 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setUploadStatus('Ошибка: размер файла не должен превышать 5MB');
+                return;
+            }
+            
+            setImageFile(file);
+            // Создаем локальный URL для предпросмотра
+            setAvatarUrl(URL.createObjectURL(file));
+            setUploadStatus('Изображение выбрано и готово к загрузке');
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
+        setUploadStatus('Обновление профиля...');
         
         try {
-            const response = await axios.put(
-                `https://localhost:7209/api/User/${userId}`,
-                formData,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
-            
-            setUser({
-                ...user,
+            // Обновляем информацию профиля
+            console.log('Отправка данных для обновления:', formData);
+            const updateResponse = await apiClient.put(`/api/User/${userId}`, {
                 username: formData.username,
                 email: formData.email
             });
             
-            setIsEditing(false);
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            alert('Failed to update profile. Please try again.');
-        }
-    };
-
-    const handleAvatarChange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-        
-        // Create a FormData instance
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        setUploadingAvatar(true);
-        
-        try {
-            // First, upload to Cloudinary through our API
-            const uploadResponse = await axios.post(
-                'https://localhost:7209/api/Cloudinary/upload',
-                formData,
-                {
+            console.log('Ответ при обновлении профиля:', updateResponse.data);
+            
+            // Обновляем локальное состояние пользователя
+            setUser(prev => ({
+                ...prev,
+                username: formData.username,
+                email: formData.email
+            }));
+            
+            // Обновляем аватар если был выбран файл
+            if (imageFile) {
+                setUploadStatus('Загрузка изображения...');
+                const imageFormData = new FormData();
+                imageFormData.append('file', imageFile);
+                
+                // Загружаем изображение в Cloudinary
+                console.log('Отправка файла на загрузку');
+                const uploadResponse = await apiClient.post('/api/Cloudinary/upload', imageFormData, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
                     }
+                });
+                
+                console.log('Ответ после загрузки изображения:', uploadResponse.data);
+                
+                if (uploadResponse.data && uploadResponse.data.imageUrl) {
+                    // Обновляем URL аватара в профиле пользователя
+                    console.log('Обновление URL аватара:', uploadResponse.data.imageUrl);
+                    await apiClient.put(`/api/User/${userId}/avatar`, {
+                        profileImageUrl: uploadResponse.data.imageUrl
+                    });
+                    
+                    // Обновляем локальное состояние
+                    setUser(prev => ({
+                        ...prev,
+                        profileImageUrl: uploadResponse.data.imageUrl
+                    }));
+                    setAvatarUrl(uploadResponse.data.imageUrl);
+                    
+                    // Сохраняем URL изображения в localStorage
+                    localStorage.setItem('profileImage', uploadResponse.data.imageUrl);
                 }
-            );
+            }
             
-            const imageUrl = uploadResponse.data.imageUrl;
+            // Обновляем localStorage с новым именем пользователя и email
+            localStorage.setItem('username', formData.username);
+            localStorage.setItem('userEmail', formData.email);
             
-            // Then update user profile with the new image URL
-            const userId = localStorage.getItem('userId');
-            const updateResponse = await axios.put(
-                `https://localhost:7209/api/User/${userId}/avatar`,
-                { profileImageUrl: imageUrl },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
+            // Уведомляем другие компоненты об изменении
+            const authStateChangeEvent = new Event('authStateChange');
+            window.dispatchEvent(authStateChangeEvent);
             
-            // Update local user data with new avatar
-            setUser({
-                ...user,
-                profileImageUrl: imageUrl
-            });
-            
-            alert('Avatar updated successfully!');
+            setIsEditing(false);
+            setUploadStatus('');
+            alert('Профиль успешно обновлен');
         } catch (error) {
-            console.error('Error uploading avatar:', error);
-            alert('Failed to upload avatar. Please try again.');
-        } finally {
-            setUploadingAvatar(false);
+            console.error('Ошибка при обновлении профиля:', error);
+            setUploadStatus('');
+            alert('Не удалось обновить профиль: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -151,7 +211,7 @@ function UserProfile() {
         return (
             <div className="user-profile-loading">
                 <div className="spinner"></div>
-                <p>Loading your profile...</p>
+                <p>Загрузка профиля...</p>
             </div>
         );
     }
@@ -159,9 +219,9 @@ function UserProfile() {
     if (!user) {
         return (
             <div className="user-profile-error">
-                <p>Could not load user data. Please try again later.</p>
+                <p>Не удалось загрузить данные пользователя. Пожалуйста, попробуйте позже.</p>
                 <button onClick={() => navigate('/login')} className="button primary">
-                    Back to Login
+                    Вернуться к входу
                 </button>
             </div>
         );
@@ -170,19 +230,19 @@ function UserProfile() {
     return (
         <div className="user-profile-container">
             <div className="profile-header">
-                <h1></h1>
+                <h1>Профиль пользователя</h1>
                 <button onClick={handleLogout} className="logout-button">
-                    Logout
+                    Выйти
                 </button>
             </div>
 
             <div className="profile-content">
                 <div className="avatar-section">
                     <div className="avatar-container">
-                        {user.profileImageUrl ? (
+                        {avatarUrl ? (
                             <img 
-                                src={user.profileImageUrl} 
-                                alt={`${user.username}'s avatar`} 
+                                src={avatarUrl} 
+                                alt={`Аватар ${user.username}`} 
                                 className="user-avatar" 
                             />
                         ) : (
@@ -191,17 +251,21 @@ function UserProfile() {
                             </div>
                         )}
                         
-                        <label htmlFor="avatar-upload" className="avatar-upload-label">
-                            {uploadingAvatar ? 'Uploading...' : 'Change Avatar'}
-                        </label>
-                        <input 
-                            type="file" 
-                            id="avatar-upload" 
-                            accept="image/*" 
-                            onChange={handleAvatarChange}
-                            disabled={uploadingAvatar}
-                            style={{ display: 'none' }}
-                        />
+                        {isEditing && (
+                            <div className="avatar-upload">
+                                <input 
+                                    type="file" 
+                                    id="avatar-upload" 
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="file-input" 
+                                />
+                                <label htmlFor="avatar-upload" className="file-label">
+                                    Изменить аватар
+                                </label>
+                                {uploadStatus && <p className="upload-status">{uploadStatus}</p>}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -209,7 +273,7 @@ function UserProfile() {
                     {isEditing ? (
                         <form onSubmit={handleSubmit} className="edit-form">
                             <div className="form-group">
-                                <label htmlFor="username">Username</label>
+                                <label htmlFor="username">Имя пользователя</label>
                                 <input
                                     type="text"
                                     id="username"
@@ -234,21 +298,21 @@ function UserProfile() {
                             
                             <div className="form-actions">
                                 <button type="submit" className="button primary">
-                                    Save Changes
+                                    Сохранить изменения
                                 </button>
                                 <button 
                                     type="button" 
                                     onClick={handleEditToggle}
                                     className="button secondary"
                                 >
-                                    Cancel
+                                    Отмена
                                 </button>
                             </div>
                         </form>
                     ) : (
                         <div className="user-info">
                             <div className="info-row">
-                                <span className="info-label">Username:</span>
+                                <span className="info-label">Имя пользователя:</span>
                                 <span className="info-value">{user.username}</span>
                             </div>
                             
@@ -258,19 +322,25 @@ function UserProfile() {
                             </div>
                             
                             <div className="info-row">
-                                <span className="info-label">Role:</span>
+                                <span className="info-label">Роль:</span>
                                 <span className="info-value">{user.role}</span>
                             </div>
                             
                             <div className="info-row">
-                                <span className="info-label">Member Since:</span>
+                                <span className="info-label">Участник с:</span>
                                 <span className="info-value">
                                     {new Date(user.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
                             
+                            {error && (
+                                <div className="note-box warning">
+                                    <p>{error}</p>
+                                </div>
+                            )}
+                            
                             <button onClick={handleEditToggle} className="edit-button">
-                                Edit Profile
+                                Редактировать профиль
                             </button>
                         </div>
                     )}

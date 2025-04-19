@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import OAuthLogin from './OAuthLogin';
 import './Login.css';
 
 function Register() {
@@ -19,7 +20,7 @@ function Register() {
     const handleRegister = async (e) => {
         e.preventDefault();
 
-        // Проверки на клиенте
+        // Client-side validation
         if (!email || !username || !password || !confirmPassword || !reason) {
             setMessage("All fields are required");
             return;
@@ -87,43 +88,79 @@ function Register() {
                     <div className="login-form">
                         <h2>Register</h2>
                         <form onSubmit={handleRegister}>
-                            <input
-                                type="email"
-                                placeholder="E-mail"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="text"
-                                placeholder="Username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="password"
-                                placeholder="Confirm Password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                            />
-                            <textarea
-                                placeholder="Reason for registration"
-                                value={reason}
-                                onChange={(e) => setReason(e.target.value)}
-                                required
-                            />
+                            <div className="form-group">
+                                <label htmlFor="email">
+                                    Email <span className="required">*</span>
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    placeholder="E-mail"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="username">
+                                    Username <span className="required">*</span>
+                                </label>
+                                <input
+                                    id="username"
+                                    type="text"
+                                    placeholder="Username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="password">
+                                    Password <span className="required">*</span>
+                                </label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="confirmPassword">
+                                    Confirm Password <span className="required">*</span>
+                                </label>
+                                <input
+                                    id="confirmPassword"
+                                    type="password"
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="reason">
+                                    Reason for Registration <span className="required">*</span>
+                                </label>
+                                <textarea
+                                    id="reason"
+                                    placeholder="Reason for registration"
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                    required
+                                />
+                            </div>
                             <button type="submit">Register</button>
                         </form>
-                        {message && <p style={{ color: 'red' }}>{message}</p>}
+                        
+                        {/* OAuth Login Component */}
+                        <OAuthLogin />
+                        
+                        {message && <p className={message.includes("successful") ? "success-message" : "error-message"}>
+                            {message}
+                        </p>}
                         <Link to="/login" className="register-link">
                             Already have an account? Log in
                         </Link>

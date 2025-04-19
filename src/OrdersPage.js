@@ -228,7 +228,7 @@ const OrdersPage = () => {
       )}
       
       {/* Enhanced debugging information */}
-      {(debugInfo || rawResponse) && (
+      {/* {(debugInfo || rawResponse) && (
         <Alert variant="secondary" className="mb-4">
           <Alert.Heading>
             Отладочная информация
@@ -254,7 +254,7 @@ const OrdersPage = () => {
             </>
           )}
         </Alert>
-      )}
+      )} */}
       
       {orders.length === 0 && !error ? (
         <Card className="text-center p-5 shadow-sm">

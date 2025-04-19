@@ -233,13 +233,13 @@ const CustomNavbar = () => {
                       >
                         Мои заказы
                       </button>
-                      <button 
+                      {/* <button 
                         type="button"
                         className="dropdown-item"
                         onClick={handleNavigateToCheckout}
                       >
                         Оформить заказ
-                      </button>
+                      </button> */}
                       {userRole === 'admin' && (
                         <button 
                           type="button"
