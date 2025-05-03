@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ProductService, CartService, WishlistService } from './ApiService'; // Обновите путь, если нужно
+import { ProductService, CartService, WishlistService } from './ApiService';
 import { useNavigate } from 'react-router-dom';
-import './ProductsPage.css'; // Убедитесь, что у вас есть этот файл стилей
+import { useCompare } from './CompareContext';
+import './ProductsPage.css';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -10,10 +11,14 @@ const ProductsPage = () => {
   const [error, setError] = useState(null);
   const [addingToCart, setAddingToCart] = useState({});
   const [addingToWishlist, setAddingToWishlist] = useState({});
+  const [addingToCompare, setAddingToCompare] = useState({});
   const [statusMessage, setStatusMessage] = useState(null);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  
+  // Используем контекст сравнения
+  const { addToCompare, compareItems, error: compareError } = useCompare();
   
   // Создаем события, если они не существуют
   if (!window.cartUpdateEvent) {
@@ -26,6 +31,14 @@ const ProductsPage = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Отслеживаем ошибки из контекста сравнения
+  useEffect(() => {
+    if (compareError) {
+      setStatusMessage({ type: 'error', text: compareError });
+      setTimeout(() => setStatusMessage(null), 3000);
+    }
+  }, [compareError]);
 
   const fetchProducts = async () => {
     try {
@@ -130,12 +143,52 @@ const ProductsPage = () => {
     }
   };
 
+  // Новая функция для добавления товара в список сравнения
+  const handleAddToCompare = async (e, productId) => {
+    e.stopPropagation(); // Предотвращаем навигацию
+    
+    try {
+      // Проверяем, уже добавлен ли товар в сравнение
+      if (compareItems.some(item => item.id === productId)) {
+        setStatusMessage({ type: 'info', text: 'Товар уже добавлен в список сравнения' });
+        setTimeout(() => setStatusMessage(null), 3000);
+        return;
+      }
+      
+      // Устанавливаем состояние загрузки для этого товара
+      setAddingToCompare(prev => ({ ...prev, [productId]: true }));
+      
+      // Вызываем функцию из контекста сравнения
+      const result = await addToCompare(productId);
+      
+      if (result) {
+        // Показываем сообщение об успехе
+        setStatusMessage({ type: 'success', text: 'Товар добавлен в список сравнения' });
+      }
+      
+      // Автоматически скрываем сообщение через 3 секунды
+      setTimeout(() => setStatusMessage(null), 3000);
+    } catch (error) {
+      console.error('Ошибка при добавлении в сравнение:', error);
+      setStatusMessage({ type: 'error', text: 'Ошибка при добавлении товара в список сравнения' });
+      setTimeout(() => setStatusMessage(null), 3000);
+    } finally {
+      // Сбрасываем состояние загрузки
+      setAddingToCompare(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
   const navigateToProductDetail = (productId) => {
     navigate(`/product/${productId}`);
   };
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
+  };
+  
+  // Проверка, находится ли товар в списке сравнения
+  const isInCompare = (productId) => {
+    return compareItems.some(item => item.id === productId);
   };
   
   // Фильтруем товары по выбранной категории
@@ -258,13 +311,18 @@ const ProductsPage = () => {
                   
                   {/* Кнопка сравнения */}
                   <button 
-                    className="marketplace-compare-btn"
-                    onClick={(e) => e.stopPropagation()} 
-                    aria-label="Сравнить"
+                    className={`marketplace-compare-btn ${isInCompare(product.id) ? 'active' : ''} ${addingToCompare[product.id] ? 'loading' : ''}`}
+                    onClick={(e) => handleAddToCompare(e, product.id)} 
+                    disabled={addingToCompare[product.id]}
+                    aria-label="Добавить к сравнению"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 16L10 12L6 8M14 8L18 12L14 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    {addingToCompare[product.id] ? (
+                      <span className="btn-spinner"></span>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 16L10 12L6 8M14 8L18 12L14 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
                   </button>
 
                   <div className="marketplace-image-container">

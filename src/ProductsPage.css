@@ -548,3 +548,86 @@
     height: 40px;
   }
 }
+
+/* Добавьте эти стили в ваш файл ProductsPage.css */
+
+/* Стили для кнопки сравнения */
+.marketplace-compare-btn {
+  position: absolute;
+  top: 10px;
+  right: 50px; /* Размещаем справа от кнопки избранного */
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.marketplace-compare-btn:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.marketplace-compare-btn.active {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.marketplace-compare-btn.active:hover {
+  background-color: #3a80d2;
+}
+
+.marketplace-compare-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Обновленные стили для уведомлений */
+.marketplace-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 1000;
+  animation: slide-in 0.3s ease-out forwards;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.marketplace-notification.success {
+  background-color: #dff2bf;
+  color: #4f8a10;
+  border-left: 4px solid #4f8a10;
+}
+
+.marketplace-notification.error {
+  background-color: #ffbaba;
+  color: #d8000c;
+  border-left: 4px solid #d8000c;
+}
+
+.marketplace-notification.info {
+  background-color: #bde5f8;
+  color: #00529b;
+  border-left: 4px solid #00529b;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

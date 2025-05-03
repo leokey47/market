@@ -1,0 +1,59 @@
+/* Стили для плавающей кнопки сравнения */
+.compare-floating-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+  }
+  
+  .compare-floating-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 28px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .compare-floating-button:hover {
+    background-color: #3a80d2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+  
+  .compare-floating-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    color: #4a90e2;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .compare-floating-text {
+    margin-left: 4px;
+  }
+  
+  /* Медиа-запрос для мобильных устройств */
+  @media (max-width: 768px) {
+    .compare-floating-container {
+      bottom: 16px;
+      right: 16px;
+    }
+    
+    .compare-floating-button {
+      padding: 10px 16px;
+    }
+  }
