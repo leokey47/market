@@ -9,7 +9,6 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  // Важно: отключаем withCredentials для токен-аутентификации
   withCredentials: false
 });
 
@@ -31,12 +30,8 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   response => response,
   error => {
-    // Обрабатываем 401 Unauthorized глобально - перенаправляем на логин
     if (error.response && error.response.status === 401) {
-      // Сохраняем текущее местоположение для перенаправления после логина
       localStorage.setItem('loginRedirect', window.location.pathname);
-      
-      // Перенаправляем только если мы не на странице логина
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
@@ -48,20 +43,16 @@ apiClient.interceptors.response.use(
 // Функция для обновления количества в корзине
 const updateCartCount = (change = 0, absolute = null) => {
   try {
-    // Если указано абсолютное значение, используем его
     if (absolute !== null) {
       localStorage.setItem('cartCount', absolute.toString());
     } else {
-      // Иначе корректируем на величину изменения
       const currentCount = parseInt(localStorage.getItem('cartCount') || '0');
       const newCount = Math.max(0, currentCount + change);
       localStorage.setItem('cartCount', newCount.toString());
     }
     
-    // Создаем кастомное событие для обновления UI
     const cartUpdateEvent = new Event('cartUpdate');
     window.dispatchEvent(cartUpdateEvent);
-    window.cartUpdateEvent = cartUpdateEvent; // Сохраняем для доступа из других компонентов
   } catch (error) {
     console.error('Ошибка обновления счетчика корзины:', error);
   }
@@ -70,20 +61,16 @@ const updateCartCount = (change = 0, absolute = null) => {
 // Функция для обновления количества в списке желаемого
 const updateWishlistCount = (change = 0, absolute = null) => {
   try {
-    // Если указано абсолютное значение, используем его
     if (absolute !== null) {
       localStorage.setItem('wishlistCount', absolute.toString());
     } else {
-      // Иначе корректируем на величину изменения
       const currentCount = parseInt(localStorage.getItem('wishlistCount') || '0');
       const newCount = Math.max(0, currentCount + change);
       localStorage.setItem('wishlistCount', newCount.toString());
     }
     
-    // Создаем кастомное событие для обновления UI
     const wishlistUpdateEvent = new Event('wishlistUpdate');
     window.dispatchEvent(wishlistUpdateEvent);
-    window.wishlistUpdateEvent = wishlistUpdateEvent; // Сохраняем для доступа из других компонентов
   } catch (error) {
     console.error('Ошибка обновления счетчика желаемого:', error);
   }
@@ -94,10 +81,7 @@ const CartService = {
   getCartItems: async () => {
     try {
       const response = await apiClient.get('/api/Cart');
-      
-      // Обновляем счетчик корзины в localStorage
       updateCartCount(0, response.data.length);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка получения товаров корзины:', error);
@@ -107,13 +91,8 @@ const CartService = {
  
   addToCart: async (productId, quantity = 1) => {
     try {
-      console.log(`Добавление товара ${productId} в корзину, количество: ${quantity}`);
-      
       const response = await apiClient.post('/api/Cart', { productId, quantity });
-      
-      // Обновляем счетчик корзины
       updateCartCount(1);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка добавления в корзину:', error);
@@ -134,10 +113,7 @@ const CartService = {
   removeCartItem: async (cartItemId) => {
     try {
       const response = await apiClient.delete(`/api/Cart/${cartItemId}`);
-      
-      // Обновляем счетчик корзины
       updateCartCount(-1);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка удаления товара из корзины:', error);
@@ -148,10 +124,7 @@ const CartService = {
   clearCart: async () => {
     try {
       const response = await apiClient.delete('/api/Cart');
-      
-      // Обновляем счетчик корзины
       updateCartCount(0, 0);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка очистки корзины:', error);
@@ -165,10 +138,7 @@ const WishlistService = {
   getWishlistItems: async () => {
     try {
       const response = await apiClient.get('/api/Wishlist');
-      
-      // Обновляем счетчик желаемого
       updateWishlistCount(0, response.data.length);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка получения списка желаемого:', error);
@@ -178,13 +148,8 @@ const WishlistService = {
  
   addToWishlist: async (productId) => {
     try {
-      console.log(`Добавление товара ${productId} в список желаемого`);
-      
       const response = await apiClient.post('/api/Wishlist', { productId });
-      
-      // Обновляем счетчик желаемого
       updateWishlistCount(1);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка добавления в список желаемого:', error);
@@ -195,10 +160,7 @@ const WishlistService = {
   removeWishlistItem: async (wishlistItemId) => {
     try {
       const response = await apiClient.delete(`/api/Wishlist/${wishlistItemId}`);
-      
-      // Обновляем счетчик желаемого
       updateWishlistCount(-1);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка удаления из списка желаемого:', error);
@@ -209,11 +171,8 @@ const WishlistService = {
   moveToCart: async (wishlistItemId) => {
     try {
       const response = await apiClient.post(`/api/Wishlist/MoveToCart/${wishlistItemId}`);
-      
-      // Обновляем оба счетчика
       updateWishlistCount(-1);
       updateCartCount(1);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка перемещения в корзину:', error);
@@ -224,10 +183,7 @@ const WishlistService = {
   clearWishlist: async () => {
     try {
       const response = await apiClient.delete('/api/Wishlist');
-      
-      // Обновляем счетчик желаемого
       updateWishlistCount(0, 0);
-      
       return response.data;
     } catch (error) {
       console.error('Ошибка очистки списка желаемого:', error);
@@ -321,6 +277,37 @@ const UserService = {
       console.error('Ошибка обновления аватара:', error);
       throw error;
     }
+  },
+  
+  // Методы для бизнес-аккаунта
+  createBusinessAccount: async (userId, businessData) => {
+    try {
+      const response = await apiClient.post(`/api/User/${userId}/business`, businessData);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка создания бизнес аккаунта:', error);
+      throw error;
+    }
+  },
+  
+  getBusinessProducts: async (userId) => {
+    try {
+      const response = await apiClient.get(`/api/User/${userId}/products`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения товаров бизнес аккаунта:', error);
+      throw error;
+    }
+  },
+  
+  updateBusinessProfile: async (userId, businessData) => {
+    try {
+      const response = await apiClient.put(`/api/User/${userId}/business`, businessData);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка обновления бизнес профиля:', error);
+      throw error;
+    }
   }
 };
 
@@ -369,9 +356,51 @@ const AuthService = {
     }
   },
   
-  // Метод для Google авторизации - использует прямую навигацию
   googleLogin: () => {
     window.location.href = `${API_URL}/api/GoogleAuth/login`;
+  }
+};
+
+// Сервис платежей
+const PaymentService = {
+  getAvailableCurrencies: async () => {
+    try {
+      const response = await apiClient.get('/api/Payment/currencies');
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения валют:', error);
+      throw error;
+    }
+  },
+  
+  createPayment: async (currency) => {
+    try {
+      const response = await apiClient.post('/api/Payment/create', { currency });
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка создания платежа:', error);
+      throw error;
+    }
+  },
+  
+  checkOrderStatus: async (orderId) => {
+    try {
+      const response = await apiClient.get(`/api/Payment/check/${orderId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка проверки статуса заказа:', error);
+      throw error;
+    }
+  },
+  
+  getUserOrders: async () => {
+    try {
+      const response = await apiClient.get('/api/Payment/orders');
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения заказов пользователя:', error);
+      throw error;
+    }
   }
 };
 
@@ -387,6 +416,46 @@ const testApiConnection = async () => {
   }
 };
 
+// Утилиты для работы с токеном
+const TokenUtils = {
+  isTokenValid: () => {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp * 1000;
+      return Date.now() < exp;
+    } catch (error) {
+      return false;
+    }
+  },
+  
+  getUserIdFromToken: () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId || payload.sub;
+    } catch (error) {
+      return null;
+    }
+  },
+  
+  getRoleFromToken: () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    } catch (error) {
+      return null;
+    }
+  }
+};
+
 // Экспортируем все сервисы
 export {
   CartService,
@@ -395,6 +464,10 @@ export {
   UserService,
   CloudinaryService,
   AuthService,
+  PaymentService,
+  TokenUtils,
   apiClient,
-  testApiConnection
+  testApiConnection,
+  updateCartCount,
+  updateWishlistCount
 };

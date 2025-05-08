@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { apiClient } from './ApiService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function OAuthCallback() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -14,7 +16,6 @@ function OAuthCallback() {
             try {
                 console.log("Обработка OAuth-перенаправления. Параметры URL:", location.search);
                 
-                // Проверяем наличие параметра error
                 const params = new URLSearchParams(location.search);
                 const errorMsg = params.get('error');
                 
@@ -25,7 +26,6 @@ function OAuthCallback() {
                     return;
                 }
                 
-                // Получаем токен из параметров URL
                 const token = params.get('token');
                 
                 if (!token) {
@@ -36,21 +36,18 @@ function OAuthCallback() {
                 }
                 
                 console.log("Токен получен, декодирование...");
+                setMessage('Aутентификация успешна, получение данных профиля...');
                 
-                // Декодируем токен для получения информации о пользователе
                 const decodedToken = jwtDecode(token);
                 console.log("Декодированный токен:", decodedToken);
                 
                 // Поиск userId в токене
                 let userId = null;
-                
-                // Ищем userId в различных возможных форматах
                 if (decodedToken.userId) {
                     userId = decodedToken.userId;
                 } else if (decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']) {
                     userId = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
                 } else {
-                    // Ищем любое поле, содержащее userId или id
                     for (const key in decodedToken) {
                         if (key.toLowerCase().includes('userid') || key.toLowerCase() === 'id') {
                             userId = decodedToken[key];
@@ -66,7 +63,6 @@ function OAuthCallback() {
                 } else if (decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']) {
                     userName = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
                 } else {
-                    // Ищем любое поле, содержащее name
                     for (const key in decodedToken) {
                         if (key.toLowerCase().includes('name') && typeof decodedToken[key] === 'string') {
                             userName = decodedToken[key];
@@ -83,32 +79,6 @@ function OAuthCallback() {
                     userRole = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
                 }
                 
-                // Поиск email пользователя
-                let userEmail = null;
-                if (decodedToken.email) {
-                    userEmail = decodedToken.email;
-                } else if (decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']) {
-                    userEmail = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
-                } else {
-                    // Ищем любое поле, содержащее email
-                    for (const key in decodedToken) {
-                        if (key.toLowerCase().includes('email') && typeof decodedToken[key] === 'string') {
-                            userEmail = decodedToken[key];
-                            break;
-                        }
-                    }
-                }
-                
-                // Поиск URL изображения профиля
-                let profileImage = null;
-                if (decodedToken.picture) {
-                    profileImage = decodedToken.picture;
-                } else if (decodedToken['urn:google:image']) {
-                    profileImage = decodedToken['urn:google:image'];
-                } else if (decodedToken.profileImageUrl) {
-                    profileImage = decodedToken.profileImageUrl;
-                }
-                
                 if (!userId) {
                     console.error("UserId не найден в токене", decodedToken);
                     setError('Недопустимые данные токена');
@@ -116,79 +86,89 @@ function OAuthCallback() {
                     return;
                 }
                 
-                console.log(`Данные пользователя: ID=${userId}, Имя=${userName}, Роль=${userRole}, Email=${userEmail}, Изображение=${profileImage}`);
+                console.log(`Данные пользователя: ID=${userId}, Имя=${userName}, Роль=${userRole}`);
                 
-                // Сохраняем данные аутентификации в localStorage
+                // Сохраняем токен
                 localStorage.setItem('token', token);
-                localStorage.setItem('userId', userId);
-                localStorage.setItem('username', userName || 'Пользователь');
-                localStorage.setItem('role', userRole);
                 
-                // Сохраняем дополнительную информацию, если она доступна
-                if (userEmail) {
-                    localStorage.setItem('userEmail', userEmail);
-                }
-                
-                if (profileImage) {
-                    localStorage.setItem('profileImage', profileImage);
-                }
-                
-                // Создаем и отправляем событие для уведомления приложения об изменении состояния аутентификации
-                const authStateChangeEvent = new Event('authStateChange');
-                window.dispatchEvent(authStateChangeEvent);
-                
-                // Пробуем получить данные корзины для инициализации счетчиков
                 try {
-                    const response = await fetch('https://localhost:7209/api/Cart', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
+                    // Получаем полные данные пользователя
+                    apiClient.defaults.headers.Authorization = `Bearer ${token}`;
+                    const userResponse = await apiClient.get(`/api/User/${userId}`);
+                    const userData = userResponse.data;
                     
-                    if (response.ok) {
-                        const cartItems = await response.json();
-                        console.log("Получены данные корзины", cartItems.length, "товаров");
-                        localStorage.setItem('cartCount', cartItems.length.toString());
-                        
-                        // Отправляем событие обновления корзины, если оно существует
-                        if (window.cartUpdateEvent) {
-                            window.dispatchEvent(window.cartUpdateEvent);
-                        }
+                    // Сохраняем все данные пользователя
+                    localStorage.setItem('userId', userData.userId.toString());
+                    localStorage.setItem('username', userData.username);
+                    localStorage.setItem('userEmail', userData.email);
+                    localStorage.setItem('role', userData.role);
+                    localStorage.setItem('isBusiness', userData.isBusiness.toString());
+                    
+                    if (userData.profileImageUrl) {
+                        localStorage.setItem('profileImage', userData.profileImageUrl);
                     }
+                    
+                    // Если бизнес аккаунт, сохраняем дополнительную информацию
+                    if (userData.isBusiness) {
+                        localStorage.setItem('companyName', userData.companyName || '');
+                        localStorage.setItem('companyAvatar', userData.companyAvatar || '');
+                        localStorage.setItem('companyDescription', userData.companyDescription || '');
+                    }
+                    
+                    // Создаем и отправляем событие для уведомления приложения об изменении состояния аутентификации
+                    const authStateChangeEvent = new Event('authStateChange');
+                    window.dispatchEvent(authStateChangeEvent);
+                    
+                    // Получаем данные корзины
+                    try {
+                        const cartResponse = await apiClient.get('/api/Cart');
+                        localStorage.setItem('cartCount', cartResponse.data.length.toString());
+                        const cartUpdateEvent = new Event('cartUpdate');
+                        window.dispatchEvent(cartUpdateEvent);
+                    } catch (error) {
+                        console.warn("Не удалось загрузить данные корзины", error);
+                        localStorage.setItem('cartCount', '0');
+                    }
+                    
+                    // Получаем данные списка желаемого
+                    try {
+                        const wishlistResponse = await apiClient.get('/api/Wishlist');
+                        localStorage.setItem('wishlistCount', wishlistResponse.data.length.toString());
+                        const wishlistUpdateEvent = new Event('wishlistUpdate');
+                        window.dispatchEvent(wishlistUpdateEvent);
+                    } catch (error) {
+                        console.warn("Не удалось загрузить данные списка желаемого", error);
+                        localStorage.setItem('wishlistCount', '0');
+                    }
+                    
+                    setMessage('Вход выполнен успешно! Перенаправление...');
+                    
+                    // Перенаправляем через секунду
+                    setTimeout(() => {
+                        if (userRole === 'admin') {
+                            navigate('/admin');
+                        } else {
+                            navigate('/');
+                        }
+                    }, 1000);
+                    
                 } catch (error) {
-                    console.warn("Не удалось загрузить данные корзины", error);
+                    console.error('Ошибка получения данных пользователя:', error);
+                    // Все еще позволяем вход, используя данные из токена
+                    localStorage.setItem('userId', userId);
+                    localStorage.setItem('username', userName || 'Пользователь');
+                    localStorage.setItem('role', userRole);
+                    localStorage.setItem('isBusiness', 'false');
                     localStorage.setItem('cartCount', '0');
-                }
-                
-                // Также получаем количество товаров в списке желаемого
-                try {
-                    const response = await fetch('https://localhost:7209/api/Wishlist', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const wishlistItems = await response.json();
-                        localStorage.setItem('wishlistCount', wishlistItems.length.toString());
-                        
-                        // Отправляем событие обновления списка желаемого, если оно существует
-                        if (window.wishlistUpdateEvent) {
-                            window.dispatchEvent(window.wishlistUpdateEvent);
-                        }
-                    }
-                } catch (error) {
-                    console.warn("Не удалось загрузить данные списка желаемого", error);
                     localStorage.setItem('wishlistCount', '0');
+                    
+                    const authStateChangeEvent = new Event('authStateChange');
+                    window.dispatchEvent(authStateChangeEvent);
+                    
+                    setMessage('Вход выполнен, но некоторые данные профиля недоступны');
+                    setTimeout(() => navigate('/'), 1000);
                 }
                 
-                // Перенаправляем на административную или домашнюю страницу в зависимости от роли
-                console.log("Перенаправление пользователя...");
-                if (userRole === 'admin') {
-                    navigate('/admin');
-                } else {
-                    navigate('/');
-                }
             } catch (error) {
                 console.error('Ошибка при обработке OAuth-перенаправления:', error);
                 setError(`Ошибка аутентификации: ${error.message || 'Неизвестная ошибка'}`);
@@ -205,7 +185,7 @@ function OAuthCallback() {
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Загрузка...</span>
                 </div>
-                <p className="mt-3">Завершение процесса аутентификации...</p>
+                <p className="mt-3">{message || 'Завершение процесса аутентификации...'}</p>
             </div>
         );
     }
@@ -235,7 +215,7 @@ function OAuthCallback() {
         );
     }
 
-    return null; // Не рендерится, так как будет перенаправление
+    return null;
 }
 
 export default OAuthCallback;

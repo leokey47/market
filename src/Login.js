@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { apiClient } from './ApiService';
 import OAuthLogin from './OAuthLogin';
 import './Login.css';
-
-// Custom event for auth state changes
-const authStateChangeEvent = new Event('authStateChange');
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -15,24 +13,56 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Helper function to update auth state and dispatch event
-    const updateAuthState = (token, userId, userName, userRole) => {
-        localStorage.setItem('token', token);
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('username', userName);
-        localStorage.setItem('role', userRole);
-        
-        // Dispatch custom event to notify Navbar about auth state change
-        window.dispatchEvent(authStateChangeEvent);
-        
-        // Also fetch and update cart and wishlist counts if applicable
-        fetchUserCounts(token);
+    // Helper function to check user status and save all data
+    const checkUserStatus = async (token) => {
+        try {
+            apiClient.defaults.headers.Authorization = `Bearer ${token}`;
+            const userId = jwtDecode(token).userId;
+            
+            const userResponse = await apiClient.get(`/api/User/${userId}`);
+            const userData = userResponse.data;
+            
+            // Сохраняем все данные пользователя
+            localStorage.setItem('userId', userData.userId.toString());
+            localStorage.setItem('username', userData.username);
+            localStorage.setItem('userEmail', userData.email);
+            localStorage.setItem('role', userData.role);
+            localStorage.setItem('isBusiness', userData.isBusiness.toString());
+            
+            if (userData.profileImageUrl) {
+                localStorage.setItem('profileImage', userData.profileImageUrl);
+            }
+            
+            // Если бизнес аккаунт, сохраняем дополнительную информацию
+            if (userData.isBusiness) {
+                localStorage.setItem('companyName', userData.companyName || '');
+                localStorage.setItem('companyAvatar', userData.companyAvatar || '');
+                localStorage.setItem('companyDescription', userData.companyDescription || '');
+            }
+            
+            // Обновляем состояние аутентификации
+            const authStateChangeEvent = new Event('authStateChange');
+            window.dispatchEvent(authStateChangeEvent);
+            
+            // Получаем счетчики
+            await fetchUserCounts(token);
+            
+            return true;
+        } catch (error) {
+            console.error('Error checking user status:', error);
+            // Все еще позволяем вход, используя данные из токена
+            const decodedToken = jwtDecode(token);
+            localStorage.setItem('userId', decodedToken.userId);
+            localStorage.setItem('username', decodedToken.name || 'Пользователь');
+            localStorage.setItem('role', decodedToken.role || 'user');
+            localStorage.setItem('isBusiness', 'false');
+            return false;
+        }
     };
     
     // Function to fetch cart and wishlist counts after login
     const fetchUserCounts = async (token) => {
         try {
-            // Create an axios instance with the token
             const api = axios.create({
                 baseURL: 'https://localhost:7209/api',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -42,34 +72,19 @@ function Login() {
             const cartResponse = await api.get('/Cart');
             if (cartResponse.data) {
                 localStorage.setItem('cartCount', cartResponse.data.length.toString());
-                // Dispatch cart update event if it exists
-                if (window.cartUpdateEvent) {
-                    window.dispatchEvent(window.cartUpdateEvent);
-                } else {
-                    // Create and dispatch event if it doesn't exist
-                    const cartUpdateEvent = new Event('cartUpdate');
-                    window.cartUpdateEvent = cartUpdateEvent;
-                    window.dispatchEvent(cartUpdateEvent);
-                }
+                const cartUpdateEvent = new Event('cartUpdate');
+                window.dispatchEvent(cartUpdateEvent);
             }
             
             // Fetch wishlist count
             const wishlistResponse = await api.get('/Wishlist');
             if (wishlistResponse.data) {
                 localStorage.setItem('wishlistCount', wishlistResponse.data.length.toString());
-                // Dispatch wishlist update event if it exists
-                if (window.wishlistUpdateEvent) {
-                    window.dispatchEvent(window.wishlistUpdateEvent);
-                } else {
-                    // Create and dispatch event if it doesn't exist
-                    const wishlistUpdateEvent = new Event('wishlistUpdate');
-                    window.wishlistUpdateEvent = wishlistUpdateEvent;
-                    window.dispatchEvent(wishlistUpdateEvent);
-                }
+                const wishlistUpdateEvent = new Event('wishlistUpdate');
+                window.dispatchEvent(wishlistUpdateEvent);
             }
         } catch (error) {
             console.error('Error fetching user counts:', error);
-            // Set default counts to 0 if fetch fails
             localStorage.setItem('cartCount', '0');
             localStorage.setItem('wishlistCount', '0');
         }
@@ -87,30 +102,22 @@ function Login() {
             });
             
             const token = response.data.token;
+            localStorage.setItem('token', token);
             
-            try {
-                const decodedToken = jwtDecode(token);
-                const userId = decodedToken.userId; 
-                const userName = decodedToken.name || decodedToken[Object.keys(decodedToken).find(key => key.includes('name'))];
-                const userRole = decodedToken.role || decodedToken[Object.keys(decodedToken).find(key => key.includes('role'))];
-
-                if (userId && userName) {
-                    // Update auth state and trigger Navbar update
-                    updateAuthState(token, userId, userName, userRole);
-                    
-                    if (userRole === 'admin') {
-                        navigate('/admin'); // Redirect to admin dashboard
-                    } else {
-                        navigate('/'); // Redirect to home page
-                    }
-                } else {
-                    console.error('userId or username not found in token');
-                    setMessage('Login failed: Invalid token data');
-                }
-            } catch (decodeError) {
-                console.error('Error decoding token:', decodeError);
-                setMessage('Login failed: Invalid token format');
+            // Проверяем статус пользователя
+            const statusChecked = await checkUserStatus(token);
+            
+            // Перенаправляем
+            const redirectPath = localStorage.getItem('loginRedirect') || '/';
+            localStorage.removeItem('loginRedirect');
+            
+            const role = localStorage.getItem('role');
+            if (role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate(redirectPath);
             }
+            
         } catch (error) {
             console.error('Login error:', error);
             

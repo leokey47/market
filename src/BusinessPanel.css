@@ -1,0 +1,380 @@
+/* BusinessPanel.css */
+
+.business-panel-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.business-panel-loading,
+.business-panel-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 20px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0d6efd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Business Header */
+.business-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.business-info-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.business-logo {
+    width: 80px;
+    height: 80px;
+}
+
+.business-logo-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.business-logo-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background-color: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.business-title h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #333;
+}
+
+.business-title p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+.back-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+/* Products Section */
+.products-section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.products-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.add-product-button {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-product-button:hover {
+    background-color: #0b5ed7;
+}
+
+/* Add Product Form */
+.add-product-form {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.add-product-form h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.specifications-section {
+    margin-top: 20px;
+}
+
+.specs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.specs-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+.add-spec-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.add-spec-button:hover {
+    background-color: #5a6268;
+}
+
+.specification-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.specification-row input {
+    flex: 1;
+}
+
+.remove-spec-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-spec-button:hover {
+    background-color: #c82333;
+}
+
+.upload-status {
+    color: #0d6efd;
+    margin-top: 10px;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+/* Products Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.no-products {
+    text-align: center;
+    color: #666;
+    padding: 40px;
+}
+
+.product-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+    transition: box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-image {
+    height: 200px;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-info h4 {
+    margin: 0 0 10px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.product-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 5px;
+}
+
+.product-category {
+    color: #6c757d;
+    margin: 0;
+}
+
+.product-actions {
+    padding: 15px;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.view-button {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.view-button:hover {
+    background-color: #0b5ed7;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .business-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .business-info-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .products-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}

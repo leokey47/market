@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';  
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import ProductsPage from './ProductsPage';
 import ProductDetailPage from './ProductDetailPage';
 import LoginPage from './Login';
@@ -17,6 +17,7 @@ import OrderStatusPage from './OrderStatusPage';
 import PaymentSuccessPage from './PaymentSuccessPage';
 import PaymentCancelPage from './PaymentCancelPage';
 import OAuthCallback from './OAuthCallback';
+import BusinessPanel from './BusinessPanel'; // Добавлен импорт
 import CustomNavbar from './CustomNavbar';
 import CompareFloatingButton from './CompareFloatingButton';
 import { CompareProvider } from './CompareContext';
@@ -38,6 +39,22 @@ const AdminRoute = ({ element }) => {
   }
  
   return isAdmin ? element : <Navigate to="/" />;
+};
+
+// Business Guard
+const BusinessRoute = ({ element }) => {
+  const isAuthenticated = localStorage.getItem('token') !== null;
+  const isBusiness = localStorage.getItem('isBusiness') === 'true';
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  if (!isBusiness) {
+    return <Navigate to="/profile" />;
+  }
+  
+  return element;
 };
 
 const App = () => {
@@ -62,6 +79,7 @@ const App = () => {
             <Route path="/orders/:orderId" element={<PrivateRoute element={<OrderStatusPage />} />} />
             <Route path="/payment/success" element={<PaymentSuccessPage />} />
             <Route path="/payment/cancel" element={<PaymentCancelPage />} />
+            <Route path="/business-panel" element={<BusinessRoute element={<BusinessPanel />} />} />
           </Routes>
         </div>
         <CompareFloatingButton />
