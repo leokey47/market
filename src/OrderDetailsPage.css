@@ -1,0 +1,60 @@
+.order-details-page h1 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .order-status-badge {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Стили для таблицы деталей заказа */
+  .order-details-page .table td {
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .order-details-page .table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* Стили для сводки заказа */
+  .order-summary {
+    margin-bottom: 20px;
+  }
+  
+  .order-summary .card-body {
+    padding: 1.25rem;
+  }
+  
+  .summary-detail {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+  
+  .summary-total {
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+  
+  .total-price {
+    color: #007bff;
+    font-weight: bold;
+  }
+  
+  /* Стили для прилипающего компонента на мобильных устройствах */
+  @media (max-width: 992px) {
+    .order-summary.sticky-top {
+      position: static !important;
+    }
+    
+    .order-status-badge {
+      margin-top: 0.5rem;
+    }
+  }
+  
+  /* Стили для прилипающего компонента на десктопе */
+  @media (min-width: 992px) {
+    .order-summary.sticky-top {
+      top: 20px;
+      z-index: 100;
+    }
+  }

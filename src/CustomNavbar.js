@@ -137,6 +137,12 @@ const CustomNavbar = () => {
     navigate('/admin');
   };
 
+  const handleNavigateToAdminPayments = () => {
+    console.log('Navigating to admin payments...');
+    setIsDropdownOpen(false);
+    navigate('/admin/payments');
+  };
+
   const handleNavigateToOrders = () => {
     console.log('Navigating to orders...');
     setIsDropdownOpen(false);
@@ -241,13 +247,22 @@ const CustomNavbar = () => {
                         Оформить заказ
                       </button> */}
                       {userRole === 'admin' && (
-                        <button 
-                          type="button"
-                          className="dropdown-item"
-                          onClick={handleNavigateToAdmin}
-                        >
-                          Админ панель
-                        </button>
+                        <>
+                          <button 
+                            type="button"
+                            className="dropdown-item"
+                            onClick={handleNavigateToAdmin}
+                          >
+                            Админ панель
+                          </button>
+                          <button 
+                            type="button"
+                            className="dropdown-item"
+                            onClick={handleNavigateToAdminPayments}
+                          >
+                            Управление заказами
+                          </button>
+                        </>
                       )}
                       <button 
                         type="button"

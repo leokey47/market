@@ -1,0 +1,106 @@
+.nova-poshta-map-modal .modal-dialog {
+    max-width: 800px;
+  }
+  
+  .nova-poshta-map-modal .modal-body {
+    padding: 1.5rem;
+    min-height: 500px;
+  }
+  
+  .nova-poshta-map-modal .nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+  }
+  
+  .nova-poshta-map-modal .nav-tabs .nav-link {
+    color: #495057;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .nova-poshta-map-modal .nav-tabs .nav-link:hover:not(.disabled) {
+    border-color: #e9ecef #e9ecef #dee2e6;
+  }
+  
+  .nova-poshta-map-modal .nav-tabs .nav-link.active {
+    color: #007bff;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 500;
+  }
+  
+  .nova-poshta-map-modal .nav-tabs .nav-link.disabled {
+    color: #adb5bd;
+    background-color: transparent;
+    border-color: transparent;
+    cursor: not-allowed;
+  }
+  
+  .nova-poshta-map-modal .modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .selected-delivery {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 60%;
+    overflow: hidden;
+  }
+  
+  .selected-city {
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  .selected-warehouse {
+    font-size: 0.9rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  .no-city-selected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    color: #6c757d;
+  }
+  
+  /* Стили для мобильных устройств */
+  @media (max-width: 576px) {
+    .nova-poshta-map-modal .modal-dialog {
+      margin: 0.5rem;
+    }
+    
+    .nova-poshta-map-modal .modal-body {
+      padding: 1rem;
+      min-height: 400px;
+    }
+    
+    .nova-poshta-map-modal .modal-footer {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .selected-delivery {
+      max-width: 100%;
+      margin-bottom: 1rem;
+    }
+  }

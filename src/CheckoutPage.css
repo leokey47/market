@@ -1,0 +1,101 @@
+.checkout-page h1 {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Стили для шагов оформления заказа */
+  .checkout-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0 10%;
+  }
+  
+  .checkout-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .step-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .checkout-step.active .step-number {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .step-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+  }
+  
+  .checkout-step.active .step-label {
+    color: #007bff;
+    font-weight: 500;
+  }
+  
+  .step-line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #e9ecef;
+    margin: 0 10px;
+    margin-bottom: 30px;
+  }
+  
+  /* Стили для выбора валюты */
+  .currency-quick-select {
+    margin-bottom: 1rem;
+  }
+  
+  /* Стили для отображения товаров в корзине */
+  .cart-item-summary {
+    transition: background-color 0.2s ease;
+  }
+  
+  .cart-item-summary:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .cart-item-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  /* Стили для деталей доставки/оплаты */
+  .delivery-details, .payment-details {
+    font-size: 0.9rem;
+  }
+  
+  /* Адаптивные стили */
+  @media (max-width: 768px) {
+    .checkout-steps {
+      padding: 0;
+    }
+    
+    .step-label {
+      font-size: 0.75rem;
+    }
+    
+    .step-number {
+      width: 32px;
+      height: 32px;
+      font-size: 0.85rem;
+    }
+  }

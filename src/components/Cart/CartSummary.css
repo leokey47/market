@@ -1,0 +1,37 @@
+.cart-summary {
+    margin-bottom: 20px;
+  }
+  
+  .cart-summary .card-body {
+    padding: 1.25rem;
+  }
+  
+  .summary-detail {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+  
+  .summary-total {
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+  
+  .total-price {
+    color: #007bff;
+    font-weight: bold;
+  }
+  
+  /* Стили для прилипающего компонента на мобильных устройствах */
+  @media (max-width: 992px) {
+    .cart-summary.sticky-top {
+      position: static !important;
+    }
+  }
+  
+  /* Стили для прилипающего компонента на десктопе */
+  @media (min-width: 992px) {
+    .cart-summary.sticky-top {
+      top: 20px;
+      z-index: 100;
+    }
+  }

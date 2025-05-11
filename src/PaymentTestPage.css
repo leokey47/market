@@ -1,0 +1,38 @@
+.status-workflow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.status-step {
+  display: flex;
+  align-items: center;
+  margin: 0.5rem;
+}
+
+.status-step .badge {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.status-step i {
+  color: #6c757d;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .status-workflow {
+    flex-direction: column;
+  }
+  
+  .status-step {
+    margin: 0.25rem 0;
+  }
+  
+  .status-step i {
+    transform: rotate(90deg);
+    margin: 0.5rem 0;
+  }
+}

@@ -1,0 +1,45 @@
+.nova-poshta-button-container {
+    margin-bottom: 15px;
+  }
+  
+  .np-logo {
+    height: 20px;
+    width: auto;
+  }
+  
+  .selected-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .selected-city-badge,
+  .selected-warehouse-badge {
+    padding: 5px 10px;
+    border: 1px solid #dee2e6;
+    font-weight: normal;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.4;
+  }
+  
+  .selected-city-badge {
+    background-color: #e9ecef !important;
+  }
+  
+  .selected-warehouse-badge {
+    font-size: 0.8rem;
+  }
+  
+  /* Стили для мобильных устройств */
+  @media (max-width: 576px) {
+    .selected-branch {
+      margin-top: 10px;
+    }
+    
+    .selected-city-badge,
+    .selected-warehouse-badge {
+      width: 100%;
+    }
+  }

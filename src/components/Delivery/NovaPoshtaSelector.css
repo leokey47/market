@@ -1,0 +1,164 @@
+.nova-poshta-selector {
+  position: relative;
+}
+
+.city-selector,
+.warehouse-selector {
+  position: relative;
+}
+
+.input-container {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  margin-top: 2px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+}
+
+.city-dropdown {
+  top: calc(100% - 10px);
+}
+
+.warehouse-dropdown {
+  top: calc(100% - 10px);
+}
+
+.search-dropdown .list-group-item {
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.search-dropdown .list-group-item:last-child {
+  border-bottom: none;
+}
+
+.search-dropdown .list-group-item:hover:not(.disabled) {
+  background-color: #f8f9fa;
+}
+
+.search-dropdown .list-group-item.active {
+  background-color: #e9ecef;
+}
+
+.search-dropdown .list-group-item.disabled {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+}
+
+.city-name {
+  font-weight: 500;
+}
+
+.city-area {
+  color: #6c757d;
+}
+
+.selected-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.selected-city, 
+.selected-warehouse {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  font-weight: normal;
+  margin: 0;
+}
+
+.clear-btn {
+  color: rgba(255, 255, 255, 0.9);
+  margin-left: 8px;
+  padding: 0 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  transition: color 0.15s ease-in-out;
+}
+
+.clear-btn:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.warehouse-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.warehouse-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.warehouse-address {
+  font-size: 0.85rem;
+  color: #6c757d;
+  line-height: 1.2;
+}
+
+.not-working-badge {
+  font-size: 0.7rem;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.warehouse-not-working {
+  opacity: 0.6;
+}
+
+.warehouse-not-working .warehouse-item {
+  color: #6c757d;
+}
+
+.no-warehouses {
+  display: flex;
+  justify-content: center;
+}
+
+/* Для загрузчика */
+.input-group-text {
+  background-color: transparent;
+  border-left: none;
+}
+
+.form-control:focus ~ .input-group-text {
+  border-color: #86b7fe;
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 576px) {
+  .search-dropdown {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    margin-top: 5px;
+  }
+  
+  .city-dropdown,
+  .warehouse-dropdown {
+    top: auto;
+  }
+}

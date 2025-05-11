@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Form, Alert, Spinner, ListGroup } from 'react-bootstrap';
-import axios from 'axios';
+import { Container, Row, Col, Card, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { CartService, PaymentService } from './ApiService';
+import DeliveryService from './services/DeliveryService';
+import CartSummary from './components/Cart/CartSummary';
+import DeliveryStep from './components/Checkout/DeliveryStep';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
+  // Состояния для всего процесса оформления заказа
+  const [currentStep, setCurrentStep] = useState(1);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
+  
+  // Состояния для доставки - изменено с null на пустой объект
+  const [deliveryDetails, setDeliveryDetails] = useState({});
+  
+  // Состояния для оплаты
   const [processingPayment, setProcessingPayment] = useState(false);
   const [availableCurrencies, setAvailableCurrencies] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState('');
@@ -32,23 +42,8 @@ const CheckoutPage = () => {
   const fetchCartItems = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Необходимо войти в систему');
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios({
-        method: 'get',
-        url: `${API_URL}/api/Cart`,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      setCartItems(response.data);
+      const data = await CartService.getCartItems();
+      setCartItems(data);
       setError(null);
     } catch (err) {
       console.error('Error fetching cart items:', err);
@@ -60,25 +55,14 @@ const CheckoutPage = () => {
 
   const fetchAvailableCurrencies = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await axios({
-        method: 'get',
-        url: `${API_URL}/api/Payment/currencies`,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.data && Array.isArray(response.data)) {
-        setAvailableCurrencies(response.data);
+      const data = await PaymentService.getAvailableCurrencies();
+      if (data && Array.isArray(data)) {
+        setAvailableCurrencies(data);
         // Set default selected currency
-        if (response.data.includes('BTC')) {
+        if (data.includes('BTC')) {
           setSelectedCurrency('BTC');
-        } else if (response.data.length > 0) {
-          setSelectedCurrency(response.data[0]);
+        } else if (data.length > 0) {
+          setSelectedCurrency(data[0]);
         }
       }
     } catch (err) {
@@ -88,6 +72,20 @@ const CheckoutPage = () => {
 
   const handleCurrencyChange = (e) => {
     setSelectedCurrency(e.target.value);
+  };
+
+  const handleSetDeliveryDetails = (details) => {
+    setDeliveryDetails(details);
+  };
+
+  // Переход к следующему шагу
+  const handleNextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  // Переход к предыдущему шагу
+  const handlePrevStep = () => {
+    setCurrentStep(currentStep - 1);
   };
 
   const handleCheckout = async () => {
@@ -100,27 +98,36 @@ const CheckoutPage = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Необходимо войти в систему');
-        setProcessingPayment(false);
-        return;
+      // 1. Создаем заказ с оплатой
+      const paymentResponse = await PaymentService.createPayment(selectedCurrency);
+      
+      // 2. Создаем данные о доставке и привязываем к заказу
+      if (deliveryDetails && paymentResponse.orderId) {
+        try {
+          const deliveryData = {
+            orderId: paymentResponse.orderId,
+            deliveryMethod: deliveryDetails.deliveryMethod,
+            deliveryType: deliveryDetails.deliveryType,
+            recipientFullName: deliveryDetails.recipientFullName,
+            recipientPhone: deliveryDetails.recipientPhone,
+            cityRef: deliveryDetails.cityRef,
+            cityName: deliveryDetails.cityName,
+            warehouseRef: deliveryDetails.warehouseRef,
+            warehouseAddress: deliveryDetails.warehouseAddress,
+            deliveryAddress: deliveryDetails.deliveryAddress,
+            deliveryCost: deliveryDetails.deliveryCost,
+            additionalData: {}
+          };
+          
+          await DeliveryService.createDelivery(deliveryData);
+        } catch (deliveryError) {
+          console.error('Error creating delivery:', deliveryError);
+          // Продолжаем процесс, даже если доставка не создалась - она может быть добавлена позже
+        }
       }
 
-      const response = await axios({
-        method: 'post',
-        url: `${API_URL}/api/Payment/create`,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        data: {
-          currency: selectedCurrency
-        }
-      });
-
-      // Redirect to NOWPayments invoice page
-      window.location.href = response.data.paymentUrl;
+      // Редирект на страницу оплаты
+      window.location.href = paymentResponse.paymentUrl;
     } catch (err) {
       console.error('Error creating payment:', err);
       
@@ -129,10 +136,6 @@ const CheckoutPage = () => {
       
       if (err.response) {
         // Сервер ответил со статусом не 2xx
-        console.error('Server response data:', err.response.data);
-        console.error('Server response status:', err.response.status);
-        console.error('Server response headers:', err.response.headers);
-        
         if (err.response.data && typeof err.response.data === 'string') {
           errorMessage = `Ошибка: ${err.response.data}`;
         } else if (err.response.data && err.response.data.message) {
@@ -140,11 +143,9 @@ const CheckoutPage = () => {
         }
       } else if (err.request) {
         // Запрос был сделан, но ответ не получен
-        console.error('Request without response:', err.request);
         errorMessage = 'Не удалось получить ответ от сервера. Проверьте подключение к интернету.';
       } else {
         // Ошибка при подготовке запроса
-        console.error('Error message:', err.message);
         errorMessage = `Ошибка: ${err.message}`;
       }
       
@@ -188,113 +189,201 @@ const CheckoutPage = () => {
       
       {error && <Alert variant="danger">{error}</Alert>}
       
+      {/* Шаги оформления заказа */}
+      <div className="checkout-steps mb-4">
+        <div className={`checkout-step ${currentStep >= 1 ? 'active' : ''}`}>
+          <div className="step-number">1</div>
+          <div className="step-label">Доставка</div>
+        </div>
+        <div className="step-line"></div>
+        <div className={`checkout-step ${currentStep >= 2 ? 'active' : ''}`}>
+          <div className="step-number">2</div>
+          <div className="step-label">Оплата</div>
+        </div>
+        <div className="step-line"></div>
+        <div className={`checkout-step ${currentStep >= 3 ? 'active' : ''}`}>
+          <div className="step-number">3</div>
+          <div className="step-label">Подтверждение</div>
+        </div>
+      </div>
+      
       <Row>
         <Col lg={8}>
-          <Card className="mb-4 shadow-sm">
-            <Card.Header className="bg-white border-bottom-0">
-              <h5 className="mb-0">Товары в корзине ({cartItems.length})</h5>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <ListGroup variant="flush">
-                {cartItems.map(item => (
-                  <ListGroup.Item key={item.cartItemId} className="p-3">
-                    <Row className="align-items-center">
-                      <Col xs={2} md={1}>
+          {/* Шаг 1: Доставка */}
+          {currentStep === 1 && (
+            <DeliveryStep 
+              onNext={handleNextStep}
+              onSetDeliveryDetails={handleSetDeliveryDetails}
+              initialData={deliveryDetails}
+            />
+          )}
+          
+          {/* Шаг 2: Оплата */}
+          {currentStep === 2 && (
+            <Card className="mb-4 shadow-sm">
+              <Card.Header className="bg-white">
+                <h5 className="mb-0">Выберите способ оплаты</h5>
+              </Card.Header>
+              <Card.Body>
+                <Form.Group className="mb-4">
+                  <Form.Label><strong>Выберите криптовалюту для оплаты</strong></Form.Label>
+                  <div className="mb-3">
+                    <div className="d-flex flex-wrap currency-quick-select mb-2">
+                      {popularCurrencies.map(currency => (
+                        availableCurrencies.includes(currency) && (
+                          <Button 
+                            key={currency}
+                            variant={selectedCurrency === currency ? "primary" : "outline-primary"}
+                            className="me-2 mb-2"
+                            onClick={() => setSelectedCurrency(currency)}
+                          >
+                            {currency}
+                          </Button>
+                        )
+                      ))}
+                    </div>
+                    <Form.Select 
+                      value={selectedCurrency}
+                      onChange={handleCurrencyChange}
+                    >
+                      <option value="">Выберите криптовалюту</option>
+                      {availableCurrencies.map(currency => (
+                        <option key={currency} value={currency}>
+                          {currency}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </div>
+                </Form.Group>
+                
+                <div className="d-flex justify-content-between mt-4">
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handlePrevStep}
+                  >
+                    Назад
+                  </Button>
+                  <Button 
+                    variant="primary" 
+                    onClick={handleNextStep}
+                    disabled={!selectedCurrency}
+                  >
+                    Продолжить
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          )}
+          
+          {/* Шаг 3: Подтверждение заказа */}
+          {currentStep === 3 && (
+            <Card className="mb-4 shadow-sm">
+              <Card.Header className="bg-white">
+                <h5 className="mb-0">Подтверждение заказа</h5>
+              </Card.Header>
+              <Card.Body>
+                {/* Информация о доставке */}
+                <div className="mb-4">
+                  <h6>Доставка</h6>
+                  <div className="delivery-details p-3 bg-light rounded">
+                    <p className="mb-1"><strong>Способ доставки:</strong> {
+                      deliveryDetails?.deliveryMethod === 'novaposhta' 
+                        ? 'Новая Почта' 
+                        : deliveryDetails?.deliveryMethod
+                    }</p>
+                    <p className="mb-1"><strong>Тип доставки:</strong> {
+                      deliveryDetails?.deliveryType === 'warehouse' 
+                        ? 'Отделение' 
+                        : (deliveryDetails?.deliveryType === 'courier' ? 'Курьер' : deliveryDetails?.deliveryType)
+                    }</p>
+                    <p className="mb-1"><strong>Получатель:</strong> {deliveryDetails?.recipientFullName}</p>
+                    <p className="mb-1"><strong>Телефон:</strong> {deliveryDetails?.recipientPhone}</p>
+                    
+                    {deliveryDetails?.deliveryMethod === 'novaposhta' && deliveryDetails?.deliveryType === 'warehouse' && (
+                      <>
+                        <p className="mb-1"><strong>Город:</strong> {deliveryDetails.cityName}</p>
+                        <p className="mb-1"><strong>Отделение:</strong> {deliveryDetails.warehouseAddress}</p>
+                      </>
+                    )}
+                    
+                    {deliveryDetails?.deliveryType === 'courier' && (
+                      <p className="mb-1"><strong>Адрес доставки:</strong> {deliveryDetails.deliveryAddress}</p>
+                    )}
+                    
+                    <p className="mb-0"><strong>Стоимость доставки:</strong> {deliveryDetails?.deliveryCost} грн</p>
+                  </div>
+                </div>
+                
+                {/* Информация о оплате */}
+                <div className="mb-4">
+                  <h6>Оплата</h6>
+                  <div className="payment-details p-3 bg-light rounded">
+                    <p className="mb-0"><strong>Способ оплаты:</strong> Криптовалюта ({selectedCurrency})</p>
+                  </div>
+                </div>
+                
+                {/* Список товаров */}
+                <div className="mb-4">
+                  <h6>Товары ({cartItems.length})</h6>
+                  <div className="cart-items">
+                    {cartItems.map(item => (
+                      <div key={item.cartItemId} className="cart-item-summary d-flex align-items-center mb-2 p-2 border-bottom">
                         <img 
                           src={item.productImageUrl || '/placeholder-image.jpg'} 
                           alt={item.productName} 
-                          className="img-fluid rounded checkout-item-image"
+                          className="cart-item-image me-3"
+                          width="40"
+                          height="40"
                         />
-                      </Col>
-                      <Col xs={10} md={5}>
-                        <h6 className="mb-0">{item.productName}</h6>
-                        <small className="text-muted">{item.quantity} x {item.price.toLocaleString()} $</small>
-                      </Col>
-                      <Col xs={12} md={3} className="text-md-end mt-2 mt-md-0">
-                        <span className="fw-bold">{item.totalPrice.toLocaleString()} $</span>
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </Card.Body>
-          </Card>
+                        <div className="flex-grow-1">
+                          <div className="d-flex justify-content-between">
+                            <div>
+                              <p className="mb-0">{item.productName}</p>
+                              <small className="text-muted">{item.quantity} x {item.price.toLocaleString()} $</small>
+                            </div>
+                            <div className="text-end">
+                              <p className="mb-0 fw-bold">{item.totalPrice.toLocaleString()} $</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="d-flex justify-content-between mt-4">
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={handlePrevStep}
+                  >
+                    Назад
+                  </Button>
+                  <Button 
+                    variant="success" 
+                    size="lg" 
+                    onClick={handleCheckout}
+                    disabled={processingPayment}
+                  >
+                    {processingPayment ? (
+                      <>
+                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                        Обработка...
+                      </>
+                    ) : 'Оформить заказ'}
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          )}
         </Col>
         
         <Col lg={4}>
-          <Card className="shadow-sm">
-            <Card.Header className="bg-white border-bottom-0">
-              <h5 className="mb-0">Оплата заказа</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="d-flex justify-content-between mb-3">
-                <span>Товаров ({cartItems.length}):</span>
-                <span>{totalAmount.toLocaleString()} $</span>
-              </div>
-              <div className="d-flex justify-content-between mb-3">
-                <span>Доставка:</span>
-                <span>Бесплатно</span>
-              </div>
-              <hr />
-              <div className="d-flex justify-content-between mb-4 fw-bold">
-                <span>Итого:</span>
-                <span className="fs-5">{totalAmount.toLocaleString()} $</span>
-              </div>
-              
-              <Form.Group className="mb-4">
-                <Form.Label><strong>Выберите криптовалюту для оплаты</strong></Form.Label>
-                <div className="mb-3">
-                  <div className="d-flex flex-wrap currency-quick-select mb-2">
-                    {popularCurrencies.map(currency => (
-                      availableCurrencies.includes(currency) && (
-                        <Button 
-                          key={currency}
-                          variant={selectedCurrency === currency ? "primary" : "outline-primary"}
-                          className="me-2 mb-2"
-                          onClick={() => setSelectedCurrency(currency)}
-                        >
-                          {currency}
-                        </Button>
-                      )
-                    ))}
-                  </div>
-                  <Form.Select 
-                    value={selectedCurrency}
-                    onChange={handleCurrencyChange}
-                  >
-                    <option value="">Выберите криптовалюту</option>
-                    {availableCurrencies.map(currency => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </div>
-              </Form.Group>
-              
-              <Button 
-                variant="primary" 
-                size="lg" 
-                block 
-                className="w-100" 
-                onClick={handleCheckout}
-                disabled={processingPayment || !selectedCurrency}
-              >
-                {processingPayment ? (
-                  <>
-                    <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                    Обработка...
-                  </>
-                ) : 'Оплатить заказ'}
-              </Button>
-              
-              <div className="mt-3 text-center">
-                <small className="text-muted">
-                  Нажимая кнопку "Оплатить заказ", вы будете перенаправлены на страницу оплаты NOWPayments для завершения транзакции.
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
+          {/* Сводка по заказу */}
+          <CartSummary 
+            cartItems={cartItems} 
+            totalAmount={totalAmount} 
+            deliveryCost={deliveryDetails?.deliveryCost || 0}
+          />
         </Col>
       </Row>
     </Container>

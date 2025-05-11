@@ -199,13 +199,18 @@ const ProductService = {
       const response = await apiClient.get('/api/Product');
       return response.data;
     } catch (error) {
-      console.error('Ошибка получения товаров:', error);
+      console.error('Ошибка получения списка товаров:', error);
       throw error;
     }
   },
  
   getProduct: async (productId) => {
     try {
+      // Проверка наличия и корректности ID
+      if (!productId || productId === 'undefined' || productId === undefined) {
+        throw new Error('Invalid product ID');
+      }
+      
       const response = await apiClient.get(`/api/Product/${productId}`);
       return response.data;
     } catch (error) {
@@ -362,6 +367,7 @@ const AuthService = {
 };
 
 // Сервис платежей
+// В PaymentService добавьте метод testUpdateOrderStatus:
 const PaymentService = {
   getAvailableCurrencies: async () => {
     try {
@@ -372,7 +378,16 @@ const PaymentService = {
       throw error;
     }
   },
-  
+  adminFakePayment: async (orderId) => {
+    try {
+      const response = await apiClient.post(`/api/Payment/admin/fake-payment/${orderId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка обработки фейковой оплаты:', error);
+      throw error;
+    }
+  },
+
   createPayment: async (currency) => {
     try {
       const response = await apiClient.post('/api/Payment/create', { currency });
@@ -399,6 +414,22 @@ const PaymentService = {
       return response.data;
     } catch (error) {
       console.error('Ошибка получения заказов пользователя:', error);
+      throw error;
+    }
+  },
+
+  // Добавьте этот метод
+  adminGetAllOrders: async (status = '', page = 1, pageSize = 20) => {
+    try {
+      const params = new URLSearchParams();
+      if (status) params.append('status', status);
+      params.append('page', page.toString());
+      params.append('pageSize', pageSize.toString());
+      
+      const response = await apiClient.get(`/api/Payment/admin/all-orders?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения всех заказов:', error);
       throw error;
     }
   }

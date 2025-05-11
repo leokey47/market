@@ -1,0 +1,92 @@
+.tracking-history {
+    margin-bottom: 2rem;
+  }
+  
+  .history-timeline {
+    position: relative;
+    margin-top: 2rem;
+    padding-left: 30px;
+  }
+  
+  .history-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 10px;
+    left: 11px;
+    width: 2px;
+    background-color: #dee2e6;
+  }
+  
+  .history-item {
+    position: relative;
+    margin-bottom: 25px;
+  }
+  
+  .history-dot {
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #007bff;
+    z-index: 1;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+  }
+  
+  .history-content {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px 15px;
+    position: relative;
+  }
+  
+  .history-content::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 10px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #f8f9fa;
+  }
+  
+  .history-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 4px;
+  }
+  
+  .history-status {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .history-location {
+    font-size: 0.9rem;
+  }
+  
+  .history-item:first-child .history-dot {
+    background-color: #28a745;
+    box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+  }
+  
+  .history-item:last-child .history-dot {
+    background-color: #dc3545;
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+  }
+  
+  /* Стили для мобильных устройств */
+  @media (max-width: 576px) {
+    .tracking-status,
+    .tracking-location {
+      flex-direction: column;
+    }
+    
+    .tracking-status > div:not(:last-child) {
+      margin-bottom: 0.5rem;
+    }
+  } 
