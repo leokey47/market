@@ -1,0 +1,317 @@
+/* OrdersPage Styles */
+
+.orders-page {
+  margin-bottom: 3rem;
+}
+
+.orders-title {
+  font-weight: 600;
+  color: #333;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.empty-orders-card {
+  transition: transform 0.3s;
+  border: none;
+  border-radius: 10px;
+}
+
+.empty-orders-card:hover {
+  transform: translateY(-5px);
+}
+
+.empty-orders-icon {
+  height: 80px;
+  width: 80px;
+  background-color: #f8f9fa;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.empty-orders-icon i {
+  font-size: 2.5rem;
+  color: #6c757d;
+}
+
+.order-table {
+  margin-bottom: 0;
+}
+
+.order-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-top: none;
+  color: #495057;
+}
+
+.order-row {
+  transition: background-color 0.2s;
+}
+
+.order-row:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.order-pending {
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.order-completed {
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.order-id {
+  font-weight: 600;
+  color: #0d6efd;
+}
+
+.order-price {
+  font-weight: 600;
+}
+
+.order-actions {
+  white-space: nowrap;
+}
+
+.action-btn {
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+}
+
+.pay-btn {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Order Detail Modal Styles */
+.order-detail-modal {
+  max-width: 800px;
+}
+
+.order-modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.order-modal-body {
+  padding: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+}
+
+.order-info-section {
+  margin-bottom: 2rem;
+}
+
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.info-value.price {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.info-value.completed-date {
+  color: #0d6efd;
+  font-weight: 500;
+}
+
+.info-value.payment-id {
+  font-family: monospace;
+  font-size: 0.9rem;
+  background-color: #f0f0f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.order-items-section {
+  margin-bottom: 2rem;
+}
+
+.order-product-item {
+  display: flex;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+  background-color: #fff;
+}
+
+.order-product-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+.order-product-image {
+  width: 80px;
+  height: 80px;
+  margin-right: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 1px solid #eaeaea;
+}
+
+.order-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.order-product-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-name {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  color: #0d6efd;
+  transition: color 0.2s;
+}
+
+.product-name:hover {
+  color: #0a58ca;
+  text-decoration: underline;
+}
+
+.product-meta {
+  display: flex;
+  gap: 1rem;
+  color: #6c757d;
+}
+
+.product-price {
+  font-weight: 500;
+}
+
+.product-total {
+  font-weight: 600;
+  color: #198754;
+}
+
+.order-product-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.view-product-btn i {
+  font-size: 0.8rem;
+}
+
+.order-summary-section {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.total-row {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #dee2e6;
+  font-size: 1.1rem;
+}
+
+.order-modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #eaeaea;
+}
+
+/* Rating Styles for Review Component */
+.rating-input {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.rating-input .star {
+  font-size: 2rem;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+  margin-right: 0.5rem;
+}
+
+.rating-input .star:hover {
+  transform: scale(1.1);
+}
+
+.rating-input .star.filled {
+  color: #ffc107;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .order-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .order-product-item {
+    flex-direction: column;
+  }
+  
+  .order-product-image {
+    width: 100%;
+    height: 120px;
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .order-product-actions {
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Animation for new orders */
+@keyframes highlight {
+  0% {
+    background-color: rgba(255, 193, 7, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.new-order {
+  animation: highlight 2s ease-out;
+}

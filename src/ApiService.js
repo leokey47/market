@@ -378,15 +378,7 @@ const PaymentService = {
       throw error;
     }
   },
-  adminFakePayment: async (orderId) => {
-    try {
-      const response = await apiClient.post(`/api/Payment/admin/fake-payment/${orderId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка обработки фейковой оплаты:', error);
-      throw error;
-    }
-  },
+  
 
   createPayment: async (currency) => {
     try {
@@ -407,7 +399,37 @@ const PaymentService = {
       throw error;
     }
   },
-  
+  adminFakePayment: async (orderId) => {
+    try {
+      const response = await apiClient.post(`/api/Payment/admin/fake-payment/${orderId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка обработки фейковой оплаты:', error);
+      throw error;
+    }
+  },
+
+  // Получение элементов заказа
+  getOrderItems: async (orderId) => {
+    try {
+      const response = await apiClient.get(`/api/Payment/orders/${orderId}/items`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения элементов заказа:', error);
+      throw error;
+    }
+  },
+
+  // Тестовое завершение заказа
+  testCompleteOrder: async (orderId) => {
+    try {
+      const response = await apiClient.post(`/api/Payment/test-complete/${orderId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка тестового завершения заказа:', error);
+      throw error;
+    }
+  },
   getUserOrders: async () => {
     try {
       const response = await apiClient.get('/api/Payment/orders');
@@ -486,10 +508,86 @@ const TokenUtils = {
     }
   }
 };
+// ReviewService.js - Добавьте эти методы в ваш файл ApiService.js
+
+// Обновите ReviewService в вашем ApiService.js:
+
+const ReviewService = {
+  getProductReviews: async (productId) => {
+    try {
+      const response = await apiClient.get(`/api/Review/Product/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения отзывов о товаре:', error);
+      throw error;
+    }
+  },
+  
+  getUserReviews: async () => {
+    try {
+      const response = await apiClient.get('/api/Review/User');
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения отзывов пользователя:', error);
+      throw error;
+    }
+  },
+  
+  createReview: async (productId, rating, text) => {
+    try {
+      const response = await apiClient.post('/api/Review', {
+        productId,
+        rating,
+        text
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка создания отзыва:', error);
+      throw error;
+    }
+  },
+  
+  deleteReview: async (reviewId) => {
+    try {
+      const response = await apiClient.delete(`/api/Review/${reviewId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка удаления отзыва:', error);
+      throw error;
+    }
+  },
+
+  // Проверка возможности оставить отзыв
+  canUserReviewProduct: async (productId) => {
+    try {
+      const response = await apiClient.get(`/api/Review/CanReview/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка проверки возможности отзыва:', error);
+      throw error;
+    }
+  },
+
+  // Проверка существующего отзыва пользователя
+  checkUserReviewForProduct: async (productId) => {
+    try {
+      const response = await apiClient.get(`/api/Review/Check/${productId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка проверки отзыва пользователя:', error);
+      throw error;
+    }
+  }
+};
+
+// Также добавьте в PaymentService эти методы:
+
+// Не забудьте добавить экспорт ReviewService в ваш ApiService.js
 
 // Экспортируем все сервисы
 export {
   CartService,
+  ReviewService,
   WishlistService,
   ProductService,
   UserService,

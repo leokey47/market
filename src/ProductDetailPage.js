@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { CartService, WishlistService } from './ApiService';
+import { CartService, WishlistService, ReviewService } from './ApiService';
+import ProductReviews from './ProductReviews';
 import './ProductDetailPage.css';
 // Import the custom events (adjust path as needed)
 import { cartUpdateEvent, wishlistUpdateEvent } from './CustomNavbar';
@@ -24,6 +25,8 @@ const ProductDetailPage = () => {
   const [animateElements, setAnimateElements] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
+  const [reviewsCount, setReviewsCount] = useState(0);
   
   // Refs for animation targets
   const headerRef = useRef(null);
@@ -60,6 +63,25 @@ const ProductDetailPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Load product reviews
+  const loadProductReviews = async (productId) => {
+    try {
+      const reviews = await ReviewService.getProductReviews(productId);
+      
+      // Calculate average rating
+      if (reviews && reviews.length > 0) {
+        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+        setAverageRating((totalRating / reviews.length).toFixed(1));
+        setReviewsCount(reviews.length);
+      } else {
+        setAverageRating(0);
+        setReviewsCount(0);
+      }
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    }
+  };
+
   // Scroll event listener for header animation
   useEffect(() => {
     const handleScroll = () => {
@@ -87,6 +109,10 @@ const ProductDetailPage = () => {
     axios.get(`https://localhost:7209/api/Product/${id}`)
       .then(response => {
         setProduct(response.data);
+        
+        // Load reviews for this product
+        loadProductReviews(response.data.id);
+        
         // After getting product, fetch related products by category
         return axios.get('https://localhost:7209/api/Product');
       })
@@ -301,6 +327,14 @@ const ProductDetailPage = () => {
     setModalImageIndex((prev) => (prev - 1 + photos.length) % photos.length);
   };
 
+  // Handle review submitted event
+  const handleReviewSubmitted = () => {
+    // Reload reviews to update the UI
+    if (product) {
+      loadProductReviews(product.id);
+    }
+  };
+
   if (loading) {
     return (
       <div className="product-detail-loading">
@@ -332,6 +366,20 @@ const ProductDetailPage = () => {
   // Get all photos for the product
   const allPhotos = getAllProductPhotos();
   const currentPhoto = allPhotos[currentImageIndex]?.imageUrl || product.imageUrl;
+
+  // Helper function to get proper form of word "отзыв"
+  const getReviewsText = (count) => {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    
+    if (lastDigit === 1 && lastTwoDigits !== 11) {
+      return 'отзыв';
+    } else if ([2, 3, 4].includes(lastDigit) && ![12, 13, 14].includes(lastTwoDigits)) {
+      return 'отзыва';
+    } else {
+      return 'отзывов';
+    }
+  };
 
   return (
     <>
@@ -502,13 +550,15 @@ const ProductDetailPage = () => {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <svg 
                     key={star} 
-                    className={`star ${star <= 4 ? 'filled' : ''}`} 
+                    className={`star ${star <= Math.round(averageRating) ? 'filled' : ''}`} 
                     viewBox="0 0 24 24"
                   >
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                   </svg>
                 ))}
-                <span className="product-detail-rating-text">4.0 (24 отзыва)</span>
+                <span className="product-detail-rating-text">
+                  {averageRating > 0 ? averageRating : '0.0'} ({reviewsCount} {getReviewsText(reviewsCount)})
+                </span>
               </div>
             </div>
             
@@ -530,6 +580,9 @@ const ProductDetailPage = () => {
                 onClick={() => setActiveTab('reviews')}
               >
                 Отзывы
+                {reviewsCount > 0 && (
+                  <span className="reviews-count-badge">{reviewsCount}</span>
+                )}
               </button>
             </div>
             
@@ -570,7 +623,7 @@ const ProductDetailPage = () => {
               {/* Reviews Tab */}
               {activeTab === 'reviews' && (
                 <div className="product-detail-reviews">
-                  <p className="reviews-placeholder">Отзывы загружаются...</p>
+                  <ProductReviews productId={product.id} onReviewSubmitted={handleReviewSubmitted} />
                 </div>
               )}
             </div>
