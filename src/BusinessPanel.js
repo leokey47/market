@@ -21,7 +21,26 @@ function BusinessPanel() {
     const [additionalImages, setAdditionalImages] = useState([]);
     const [uploadStatus, setUploadStatus] = useState('');
     const [error, setError] = useState(null);
+    const [customCategory, setCustomCategory] = useState('');
+    const [showCustomCategory, setShowCustomCategory] = useState(false);
+    const [existingCategories, setExistingCategories] = useState([]);
     const navigate = useNavigate();
+
+    // Предустановленные категории
+    const defaultCategories = [
+        'Техника',
+        'Инструменты',
+        'Одежда',
+        'Книги',
+        'Игрушки',
+        'Спорт',
+        'Автозапчасти',
+        'Дом и сад',
+        'Красота и здоровье',
+        'Продукты питания',
+        'Мебель',
+        'Электроника'
+    ];
 
     useEffect(() => {
         const fetchBusinessData = async () => {
@@ -43,9 +62,13 @@ function BusinessPanel() {
                 
                 setBusinessData(response);
                 
-                // *** ИСПРАВЛЕНО: Используем BusinessService для получения товаров бизнеса ***
+                // Используем BusinessService для получения товаров бизнеса
                 const productsResponse = await BusinessService.getBusinessProducts(userId);
                 setProducts(productsResponse || []);
+                
+                // Извлекаем уникальные категории из существующих товаров
+                const categories = [...new Set((productsResponse || []).map(product => product.category).filter(Boolean))];
+                setExistingCategories(categories);
                 
                 setIsLoading(false);
             } catch (error) {
@@ -62,6 +85,34 @@ function BusinessPanel() {
         setProductForm({
             ...productForm,
             [e.target.name]: e.target.value
+        });
+    };
+
+    const handleCategoryChange = (e) => {
+        const selectedValue = e.target.value;
+        
+        if (selectedValue === 'custom') {
+            setShowCustomCategory(true);
+            setProductForm({
+                ...productForm,
+                category: ''
+            });
+        } else {
+            setShowCustomCategory(false);
+            setCustomCategory('');
+            setProductForm({
+                ...productForm,
+                category: selectedValue
+            });
+        }
+    };
+
+    const handleCustomCategoryChange = (e) => {
+        const value = e.target.value;
+        setCustomCategory(value);
+        setProductForm({
+            ...productForm,
+            category: value
         });
     };
 
@@ -131,6 +182,13 @@ function BusinessPanel() {
 
     const handleSubmitProduct = async (e) => {
         e.preventDefault();
+        
+        // Проверяем, что категория выбрана или введена
+        if (!productForm.category || productForm.category.trim() === '') {
+            alert('Пожалуйста, выберите или введите категорию товара');
+            return;
+        }
+        
         setUploadStatus('Создание товара...');
 
         try {
@@ -162,7 +220,7 @@ function BusinessPanel() {
                 name: productForm.name,
                 description: productForm.description,
                 price: parseFloat(productForm.price),
-                category: productForm.category,
+                category: productForm.category.trim(),
                 imageUrl: mainImageUrl,
                 additionalPhotos: additionalPhotoUrls,
                 specifications: productForm.specifications.filter(spec => spec.name && spec.value)
@@ -174,10 +232,14 @@ function BusinessPanel() {
             setUploadStatus('');
             alert('Товар успешно создан!');
             
-            // *** ИСПРАВЛЕНО: Используем BusinessService для обновления списка товаров ***
+            // Обновляем список товаров и категорий
             const userId = localStorage.getItem('userId');
             const productsResponse = await BusinessService.getBusinessProducts(userId);
             setProducts(productsResponse || []);
+            
+            // Обновляем список существующих категорий
+            const categories = [...new Set((productsResponse || []).map(product => product.category).filter(Boolean))];
+            setExistingCategories(categories);
             
             // Сбрасываем форму
             setProductForm({
@@ -191,6 +253,8 @@ function BusinessPanel() {
             });
             setMainImage(null);
             setAdditionalImages([]);
+            setCustomCategory('');
+            setShowCustomCategory(false);
             
         } catch (error) {
             console.error('Ошибка создания товара:', error);
@@ -207,10 +271,14 @@ function BusinessPanel() {
         try {
             await ProductService.deleteProduct(productId);
             
-            // *** ИСПРАВЛЕНО: Используем BusinessService для обновления списка товаров ***
+            // Обновляем список товаров
             const userId = localStorage.getItem('userId');
             const productsResponse = await BusinessService.getBusinessProducts(userId);
             setProducts(productsResponse || []);
+            
+            // Обновляем список существующих категорий
+            const categories = [...new Set((productsResponse || []).map(product => product.category).filter(Boolean))];
+            setExistingCategories(categories);
             
             alert('Товар успешно удален');
         } catch (error) {
@@ -219,7 +287,6 @@ function BusinessPanel() {
         }
     };
 
-    // *** НОВАЯ ФУНКЦИЯ: Обновление данных бизнеса ***
     const refreshBusinessData = async () => {
         const userId = localStorage.getItem('userId');
         try {
@@ -233,6 +300,10 @@ function BusinessPanel() {
             const productsResponse = await BusinessService.getBusinessProducts(userId);
             setProducts(productsResponse || []);
             
+            // Обновляем список существующих категорий
+            const categories = [...new Set((productsResponse || []).map(product => product.category).filter(Boolean))];
+            setExistingCategories(categories);
+            
             setIsLoading(false);
         } catch (error) {
             console.error('Ошибка обновления данных бизнеса:', error);
@@ -240,6 +311,9 @@ function BusinessPanel() {
             setIsLoading(false);
         }
     };
+
+    // Объединяем все доступные категории (предустановленные + существующие + без дубликатов)
+    const allCategories = [...new Set([...defaultCategories, ...existingCategories])].sort();
 
     if (isLoading) {
         return (
@@ -367,19 +441,32 @@ function BusinessPanel() {
                                         <select
                                             id="category"
                                             name="category"
-                                            value={productForm.category}
-                                            onChange={handleInputChange}
-                                            required
+                                            value={showCustomCategory ? 'custom' : productForm.category}
+                                            onChange={handleCategoryChange}
+                                            required={!showCustomCategory}
                                         >
                                             <option value="">Выберите категорию</option>
-                                            <option value="Техника">Техника</option>
-                                            <option value="Инструменты">Инструменты</option>
-                                            <option value="Одежда">Одежда</option>
-                                            <option value="Книги">Книги</option>
-                                            <option value="Игрушки">Игрушки</option>
-                                            <option value="Спорт">Спорт</option>
-                                            <option value="Другое">Другое</option>
+                                            {allCategories.map((category, index) => (
+                                                <option key={index} value={category}>{category}</option>
+                                            ))}
+                                            <option value="custom">💭 Создать новую категорию</option>
                                         </select>
+                                        
+                                        {showCustomCategory && (
+                                            <div className="custom-category-input" style={{ marginTop: '10px' }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Введите название новой категории"
+                                                    value={customCategory}
+                                                    onChange={handleCustomCategoryChange}
+                                                    required
+                                                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                                />
+                                                <small style={{ display: 'block', marginTop: '5px', color: '#666' }}>
+                                                    Введите название новой категории или выберите из списка выше
+                                                </small>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
