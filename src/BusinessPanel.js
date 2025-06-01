@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProductService, CloudinaryService, UserService, apiClient } from './ApiService';
+import { ProductService, CloudinaryService, UserService, BusinessService, apiClient } from './ApiService';
 import './BusinessPanel.css';
 
 function BusinessPanel() {
@@ -43,8 +43,8 @@ function BusinessPanel() {
                 
                 setBusinessData(response);
                 
-                // Получаем список продуктов бизнеса
-                const productsResponse = await UserService.getBusinessProducts(userId);
+                // *** ИСПРАВЛЕНО: Используем BusinessService для получения товаров бизнеса ***
+                const productsResponse = await BusinessService.getBusinessProducts(userId);
                 setProducts(productsResponse || []);
                 
                 setIsLoading(false);
@@ -174,9 +174,9 @@ function BusinessPanel() {
             setUploadStatus('');
             alert('Товар успешно создан!');
             
-            // Обновляем список товаров
+            // *** ИСПРАВЛЕНО: Используем BusinessService для обновления списка товаров ***
             const userId = localStorage.getItem('userId');
-            const productsResponse = await UserService.getBusinessProducts(userId);
+            const productsResponse = await BusinessService.getBusinessProducts(userId);
             setProducts(productsResponse || []);
             
             // Сбрасываем форму
@@ -207,15 +207,37 @@ function BusinessPanel() {
         try {
             await ProductService.deleteProduct(productId);
             
-            // Обновляем список товаров
+            // *** ИСПРАВЛЕНО: Используем BusinessService для обновления списка товаров ***
             const userId = localStorage.getItem('userId');
-            const productsResponse = await UserService.getBusinessProducts(userId);
+            const productsResponse = await BusinessService.getBusinessProducts(userId);
             setProducts(productsResponse || []);
             
             alert('Товар успешно удален');
         } catch (error) {
             console.error('Ошибка удаления товара:', error);
             alert('Не удалось удалить товар');
+        }
+    };
+
+    // *** НОВАЯ ФУНКЦИЯ: Обновление данных бизнеса ***
+    const refreshBusinessData = async () => {
+        const userId = localStorage.getItem('userId');
+        try {
+            setIsLoading(true);
+            
+            // Получаем обновленную информацию о бизнесе
+            const businessInfo = await BusinessService.getBusinessInfo(userId);
+            setBusinessData(businessInfo);
+            
+            // Получаем обновленный список товаров
+            const productsResponse = await BusinessService.getBusinessProducts(userId);
+            setProducts(productsResponse || []);
+            
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Ошибка обновления данных бизнеса:', error);
+            setError('Ошибка обновления данных бизнеса');
+            setIsLoading(false);
         }
     };
 
@@ -234,6 +256,9 @@ function BusinessPanel() {
                 <p>{error}</p>
                 <button onClick={() => navigate('/profile')} className="button primary">
                     Вернуться в профиль
+                </button>
+                <button onClick={refreshBusinessData} className="button secondary">
+                    Попробовать снова
                 </button>
             </div>
         );
@@ -272,15 +297,20 @@ function BusinessPanel() {
                         <p>{businessData.companyDescription}</p>
                     </div>
                 </div>
-                <button onClick={() => navigate('/profile')} className="back-button">
-                    Вернуться в профиль
-                </button>
+                <div className="header-actions">
+                    <button onClick={refreshBusinessData} className="refresh-button">
+                        Обновить данные
+                    </button>
+                    <button onClick={() => navigate('/profile')} className="back-button">
+                        Вернуться в профиль
+                    </button>
+                </div>
             </div>
 
             <div className="business-content">
                 <div className="products-section">
                     <div className="products-header">
-                        <h2>Мои товары</h2>
+                        <h2>Мои товары ({products.length})</h2>
                         <button 
                             onClick={() => setShowAddProductForm(!showAddProductForm)}
                             className="add-product-button"

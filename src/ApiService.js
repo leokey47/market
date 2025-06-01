@@ -284,10 +284,25 @@ const UserService = {
     }
   },
   
-  // Методы для бизнес-аккаунта
+  // *** ОБНОВЛЕНО: Методы для работы с бизнес-информацией пользователя ***
+  updateBusinessInfo: async (userId, businessData) => {
+    try {
+      // Изменен маршрут с /business на /business-info
+      const response = await apiClient.put(`/api/User/${userId}/business-info`, businessData);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка обновления бизнес информации:', error);
+      throw error;
+    }
+  }
+};
+
+// *** НОВЫЙ: Отдельный сервис для бизнес-функций ***
+const BusinessService = {
+  // Создание бизнес-аккаунта
   createBusinessAccount: async (userId, businessData) => {
     try {
-      const response = await apiClient.post(`/api/User/${userId}/business`, businessData);
+      const response = await apiClient.post(`/api/Business/create/${userId}`, businessData);
       return response.data;
     } catch (error) {
       console.error('Ошибка создания бизнес аккаунта:', error);
@@ -295,9 +310,21 @@ const UserService = {
     }
   },
   
+  // Обновление бизнес-аккаунта
+  updateBusinessAccount: async (userId, businessData) => {
+    try {
+      const response = await apiClient.put(`/api/Business/update/${userId}`, businessData);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка обновления бизнес аккаунта:', error);
+      throw error;
+    }
+  },
+  
+  // Получение товаров бизнеса
   getBusinessProducts: async (userId) => {
     try {
-      const response = await apiClient.get(`/api/User/${userId}/products`);
+      const response = await apiClient.get(`/api/Business/products/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Ошибка получения товаров бизнес аккаунта:', error);
@@ -305,12 +332,13 @@ const UserService = {
     }
   },
   
-  updateBusinessProfile: async (userId, businessData) => {
+  // Получение информации о бизнесе
+  getBusinessInfo: async (userId) => {
     try {
-      const response = await apiClient.put(`/api/User/${userId}/business`, businessData);
+      const response = await apiClient.get(`/api/Business/info/${userId}`);
       return response.data;
     } catch (error) {
-      console.error('Ошибка обновления бизнес профиля:', error);
+      console.error('Ошибка получения информации о бизнесе:', error);
       throw error;
     }
   }
@@ -367,7 +395,6 @@ const AuthService = {
 };
 
 // Сервис платежей
-// В PaymentService добавьте метод testUpdateOrderStatus:
 const PaymentService = {
   getAvailableCurrencies: async () => {
     try {
@@ -379,7 +406,6 @@ const PaymentService = {
     }
   },
   
-
   createPayment: async (currency) => {
     try {
       const response = await apiClient.post('/api/Payment/create', { currency });
@@ -399,6 +425,7 @@ const PaymentService = {
       throw error;
     }
   },
+  
   adminFakePayment: async (orderId) => {
     try {
       const response = await apiClient.post(`/api/Payment/admin/fake-payment/${orderId}`);
@@ -430,6 +457,7 @@ const PaymentService = {
       throw error;
     }
   },
+  
   getUserOrders: async () => {
     try {
       const response = await apiClient.get('/api/Payment/orders');
@@ -440,7 +468,6 @@ const PaymentService = {
     }
   },
 
-  // Добавьте этот метод
   adminGetAllOrders: async (status = '', page = 1, pageSize = 20) => {
     try {
       const params = new URLSearchParams();
@@ -508,10 +535,8 @@ const TokenUtils = {
     }
   }
 };
-// ReviewService.js - Добавьте эти методы в ваш файл ApiService.js
 
-// Обновите ReviewService в вашем ApiService.js:
-
+// Сервис для отзывов
 const ReviewService = {
   getProductReviews: async (productId) => {
     try {
@@ -580,10 +605,6 @@ const ReviewService = {
   }
 };
 
-// Также добавьте в PaymentService эти методы:
-
-// Не забудьте добавить экспорт ReviewService в ваш ApiService.js
-
 // Экспортируем все сервисы
 export {
   CartService,
@@ -591,6 +612,7 @@ export {
   WishlistService,
   ProductService,
   UserService,
+  BusinessService, 
   CloudinaryService,
   AuthService,
   PaymentService,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserProfile.css';
-import { apiClient, UserService, CloudinaryService } from './ApiService';
+import { apiClient, UserService, CloudinaryService, BusinessService } from './ApiService';
 
 function UserProfile() {
     const [user, setUser] = useState(null);
@@ -91,8 +91,8 @@ function UserProfile() {
                 }
             }
             
-            // Обновляем бизнес-информацию
-            const response = await apiClient.put(`/api/User/${userId}/business`, {
+            // *** ИСПРАВЛЕНО: Используем новый маршрут для обновления бизнес-информации ***
+            const response = await UserService.updateBusinessInfo(userId, {
                 companyName: businessData.companyName || user.companyName,
                 companyAvatar: companyAvatarUrl,
                 companyDescription: businessData.companyDescription || user.companyDescription
@@ -364,8 +364,8 @@ function UserProfile() {
                 }
             }
             
-            // Создаем бизнес аккаунт через UserService
-            await UserService.createBusinessAccount(userId, {
+            // *** ИСПРАВЛЕНО: Используем BusinessService вместо UserService ***
+            await BusinessService.createBusinessAccount(userId, {
                 companyName: businessData.companyName,
                 companyAvatar: companyLogoUrl,
                 companyDescription: businessData.companyDescription
