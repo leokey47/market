@@ -56,6 +56,8 @@ const CheckoutPage = () => {
   const fetchAvailableCurrencies = async () => {
     try {
       const data = await PaymentService.getAvailableCurrencies();
+      console.log('Получены валюты:', data); // Для отладки
+      
       if (data && Array.isArray(data)) {
         setAvailableCurrencies(data);
         // Set default selected currency
@@ -64,9 +66,19 @@ const CheckoutPage = () => {
         } else if (data.length > 0) {
           setSelectedCurrency(data[0]);
         }
+      } else {
+        // Если API не работает, используем fallback валюты
+        console.warn('API валют не вернул данные, используем fallback');
+        const fallbackCurrencies = ['BTC', 'ETH', 'LTC', 'USDT', 'USDC', 'XRP', 'DOGE', 'ADA', 'DOT', 'MATIC'];
+        setAvailableCurrencies(fallbackCurrencies);
+        setSelectedCurrency('BTC');
       }
     } catch (err) {
       console.error('Error fetching available currencies:', err);
+      // Устанавливаем fallback валюты при ошибке
+      const fallbackCurrencies = ['BTC', 'ETH', 'LTC', 'USDT', 'USDC', 'XRP', 'DOGE', 'ADA', 'DOT', 'MATIC'];
+      setAvailableCurrencies(fallbackCurrencies);
+      setSelectedCurrency('BTC');
     }
   };
 
@@ -158,11 +170,9 @@ const CheckoutPage = () => {
   if (loading) {
     return (
       <Container className="checkout-page py-5">
-        <div className="text-center">
-          <Spinner animation="border" role="status">
-            <span className="visually-hidden">Загрузка...</span>
-          </Spinner>
-          <p className="mt-2">Загрузка данных...</p>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Загрузка данных...</p>
         </div>
       </Container>
     );
@@ -173,7 +183,7 @@ const CheckoutPage = () => {
       <Container className="checkout-page py-5">
         <Card className="text-center p-5 shadow-sm">
           <Card.Body>
-            <i className="bi bi-cart fs-1 mb-3 text-muted"></i>
+            <div className="fs-1 mb-3 text-muted">🛒</div>
             <h2>Ваша корзина пуста</h2>
             <p className="text-muted mb-4">Добавьте товары из каталога, чтобы оформить заказ</p>
             <Button variant="primary" href="/">Перейти к покупкам</Button>
@@ -227,33 +237,49 @@ const CheckoutPage = () => {
               <Card.Body>
                 <Form.Group className="mb-4">
                   <Form.Label><strong>Выберите криптовалюту для оплаты</strong></Form.Label>
-                  <div className="mb-3">
-                    <div className="d-flex flex-wrap currency-quick-select mb-2">
-                      {popularCurrencies.map(currency => (
-                        availableCurrencies.includes(currency) && (
-                          <Button 
-                            key={currency}
-                            variant={selectedCurrency === currency ? "primary" : "outline-primary"}
-                            className="me-2 mb-2"
-                            onClick={() => setSelectedCurrency(currency)}
-                          >
-                            {currency}
-                          </Button>
-                        )
-                      ))}
+                  
+                  {availableCurrencies.length === 0 ? (
+                    <div className="text-center py-3">
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      <span>Загрузка доступных валют...</span>
                     </div>
-                    <Form.Select 
-                      value={selectedCurrency}
-                      onChange={handleCurrencyChange}
-                    >
-                      <option value="">Выберите криптовалюту</option>
-                      {availableCurrencies.map(currency => (
-                        <option key={currency} value={currency}>
-                          {currency}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </div>
+                  ) : (
+                    <div className="mb-3">
+                      <div className="currency-quick-select mb-2">
+                        {popularCurrencies.map(currency => (
+                          availableCurrencies.includes(currency) && (
+                            <Button 
+                              key={currency}
+                              variant={selectedCurrency === currency ? "primary" : "outline-primary"}
+                              className="me-2 mb-2"
+                              onClick={() => setSelectedCurrency(currency)}
+                            >
+                              {currency}
+                            </Button>
+                          )
+                        ))}
+                      </div>
+                      <Form.Select 
+                        value={selectedCurrency}
+                        onChange={handleCurrencyChange}
+                      >
+                        <option value="">Выберите криптовалюту</option>
+                        {availableCurrencies.map(currency => (
+                          <option key={currency} value={currency}>
+                            {currency}
+                          </option>
+                        ))}
+                      </Form.Select>
+                      
+                      {selectedCurrency && (
+                        <div className="mt-2">
+                          <small className="text-success">
+                            ✓ Выбрана валюта: <strong>{selectedCurrency}</strong>
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </Form.Group>
                 
                 <div className="d-flex justify-content-between mt-4">
@@ -285,7 +311,7 @@ const CheckoutPage = () => {
                 {/* Информация о доставке */}
                 <div className="mb-4">
                   <h6>Доставка</h6>
-                  <div className="delivery-details p-3 bg-light rounded">
+                  <div className="delivery-details">
                     <p className="mb-1"><strong>Способ доставки:</strong> {
                       deliveryDetails?.deliveryMethod === 'novaposhta' 
                         ? 'Новая Почта' 
@@ -317,7 +343,7 @@ const CheckoutPage = () => {
                 {/* Информация о оплате */}
                 <div className="mb-4">
                   <h6>Оплата</h6>
-                  <div className="payment-details p-3 bg-light rounded">
+                  <div className="payment-details">
                     <p className="mb-0"><strong>Способ оплаты:</strong> Криптовалюта ({selectedCurrency})</p>
                   </div>
                 </div>

@@ -148,7 +148,7 @@ const NovaPoshtaSelector = ({ onSelectDelivery, initialCity, initialWarehouse, d
   // Обработчик выбора города
   const handleSelectCity = (city) => {
     setSelectedCity(city);
-    setCitySearch('');
+    setCitySearch(city.Description + ', ' + city.AreaDescription);
     setShowCityDropdown(false);
     setSelectedWarehouse(null);
     
@@ -163,7 +163,7 @@ const NovaPoshtaSelector = ({ onSelectDelivery, initialCity, initialWarehouse, d
   // Обработчик выбора отделения
   const handleSelectWarehouse = (warehouse) => {
     setSelectedWarehouse(warehouse);
-    setWarehouseSearch('');
+    setWarehouseSearch(NovaPoshtaService.formatWarehouseAddress(warehouse));
     setShowWarehouseDropdown(false);
     
     // Вызываем колбэк для родительского компонента с информацией о доставке
@@ -216,7 +216,7 @@ const NovaPoshtaSelector = ({ onSelectDelivery, initialCity, initialWarehouse, d
             <Form.Control
               ref={cityInputRef}
               type="text"
-              placeholder={selectedCity ? selectedCity.Description : "Введите название города"}
+              placeholder="Введите название города"
               value={citySearch}
               onChange={(e) => setCitySearch(e.target.value)}
               onFocus={() => {
@@ -232,23 +232,7 @@ const NovaPoshtaSelector = ({ onSelectDelivery, initialCity, initialWarehouse, d
             )}
           </InputGroup>
           
-          {selectedCity && (
-            <div className="selected-item mt-2">
-              <Badge bg="primary" className="selected-city">
-                {selectedCity.Description}, {selectedCity.AreaDescription}
-                {!disabled && (
-                  <Button 
-                    variant="link" 
-                    size="sm" 
-                    className="clear-btn"
-                    onClick={handleClearCity}
-                  >
-                    ×
-                  </Button>
-                )}
-              </Badge>
-            </div>
-          )}
+          {/* УБРАНО ОТОБРАЖЕНИЕ selectedCity */}
           
           {showCityDropdown && cities.length > 0 && (
             <ListGroup ref={cityDropdownRef} className="search-dropdown city-dropdown">
@@ -290,7 +274,7 @@ const NovaPoshtaSelector = ({ onSelectDelivery, initialCity, initialWarehouse, d
               <Form.Control
                 ref={warehouseInputRef}
                 type="text"
-                placeholder={selectedWarehouse ? selectedWarehouse.Description : "Поиск отделения"}
+                placeholder="Поиск отделения"
                 value={warehouseSearch}
                 onChange={(e) => {
                   setWarehouseSearch(e.target.value);
@@ -307,23 +291,7 @@ const NovaPoshtaSelector = ({ onSelectDelivery, initialCity, initialWarehouse, d
               )}
             </InputGroup>
             
-            {selectedWarehouse && (
-              <div className="selected-item mt-2">
-                <Badge bg="success" className="selected-warehouse">
-                  {NovaPoshtaService.formatWarehouseAddress(selectedWarehouse)}
-                  {!disabled && (
-                    <Button 
-                      variant="link" 
-                      size="sm" 
-                      className="clear-btn"
-                      onClick={handleClearWarehouse}
-                    >
-                      ×
-                    </Button>
-                  )}
-                </Badge>
-              </div>
-            )}
+            {/* УБРАНО ОТОБРАЖЕНИЕ selectedWarehouse */}
             
             {showWarehouseDropdown && filteredWarehouses.length > 0 && (
               <ListGroup ref={warehouseDropdownRef} className="search-dropdown warehouse-dropdown">

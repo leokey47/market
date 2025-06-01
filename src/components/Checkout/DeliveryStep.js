@@ -353,7 +353,7 @@ const DeliveryStep = ({ onNext, onSetDeliveryDetails, initialData = {} }) => {
            )}
 
            {/* Адрес доставки для курьера */}
-           {deliveryType === 'courier' && (
+           {/* {deliveryType === 'courier' && (
              <Form.Group className="mb-4" controlId="deliveryAddress">
                <Form.Label>Адрес доставки</Form.Label>
                <Form.Control
@@ -369,7 +369,7 @@ const DeliveryStep = ({ onNext, onSetDeliveryDetails, initialData = {} }) => {
                  {errors.deliveryAddress}
                </Form.Control.Feedback>
              </Form.Group>
-           )}
+           )} */}
 
            {/* Стоимость доставки */}
            <div className="delivery-cost mt-4 mb-4">
