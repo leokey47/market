@@ -161,7 +161,7 @@ const CustomNavbar = () => {
         <div className="navbar-container">
           {/* Brand Logo */}
           <Link to="/" className="navbar-brand">
-            <span className="brand-text">market</span>
+            <span className="brand-text">og market</span>
           </Link>
 
           {/* Mobile Menu Toggle */}
