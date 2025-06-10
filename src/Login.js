@@ -203,7 +203,7 @@ function Login() {
                     <p className="undertext">
                         Express your respect for creativity by posting reviews, analyses, and critiques
                     </p>
-                    <img src="/images/lzt_logo.png" alt="LZT Logo" />
+                    
                 </div>
             </div>
         </div>

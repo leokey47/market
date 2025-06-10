@@ -162,19 +162,13 @@ const OrderProductItem = ({ product, order, onReviewSubmitted }) => {
     <Card className="mb-3 order-product-card">
       <Card.Body>
         <div className="d-flex flex-column flex-md-row">
-          {/* Изображение товара */}
+          {/* Изображение товара - УБРАЛ INLINE СТИЛИ! */}
           <div className="order-product-image me-3 mb-3 mb-md-0">
             <Link to={`/product/${product.productId}`}>
               <img
                 src={product.productImageUrl || '/placeholder-image.jpg'}
                 alt={product.productName}
-                style={{ 
-                  width: '80px', 
-                  height: '80px', 
-                  objectFit: 'contain',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '8px'
-                }}
+                className="order-product-image" /* ИСПОЛЬЗУЕМ ТОЛЬКО CSS КЛАСС */
                 onError={(e) => {
                   e.target.src = '/placeholder-image.jpg';
                 }}
