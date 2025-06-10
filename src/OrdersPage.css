@@ -619,7 +619,7 @@
 
 /* Button Styles */
 .orders-page .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 4rem;
   border-radius: 6px;
   font-weight: 500;
   font-size: 0.875rem;
@@ -628,15 +628,15 @@
 }
 
 .orders-page .btn-primary {
-  background: linear-gradient(135deg, #bdbdbd 0%, #8393fb 100%);
+  background: linear-gradient(135deg, #888585 0%, #272727 100%);
   color: white;
-  box-shadow: 0 2px 4px rgba(74, 108, 247, 0.25);
-  border-color: #4a6cf7;
+  box-shadow: 0 2px 4px rgba(86, 87, 90, 0.25);
+  border-color: #919191;
 }
 
 .orders-page .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(74, 108, 247, 0.35);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
 }
 
 .orders-page .btn-secondary {
