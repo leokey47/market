@@ -601,7 +601,7 @@ const ProductDetailPage = () => {
                     <li><span>Категория:</span> {product.category}</li>
                     <li><span>Артикул:</span> {product.id}</li>
                     <li><span>Цена:</span> ${product.price}</li>
-                    <li><span>В наличии:</span> <span className="in-stock">Да</span></li>
+                    
                     
                     {/* Отображаем характеристики продукта, если они есть */}
                     {product.specifications && product.specifications.length > 0 && 
