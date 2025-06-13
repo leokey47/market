@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { apiClient } from './ApiService';
-import OAuthLogin from './OAuthLogin';
 import './Login.css';
 
 function Login() {
@@ -11,7 +10,13 @@ function Login() {
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const navigate = useNavigate();
+
+    // Show demo hint on component mount
+    useEffect(() => {
+        showDemoHint();
+    }, []);
 
     // Helper function to check user status and save all data
     const checkUserStatus = async (token) => {
@@ -27,7 +32,7 @@ function Login() {
             localStorage.setItem('username', userData.username);
             localStorage.setItem('userEmail', userData.email);
             localStorage.setItem('role', userData.role);
-            localStorage.setItem('isBusiness', userData.isBusiness.toString());
+            localStorage.setItem('isBusiness', userData.isBusiness ? userData.isBusiness.toString() : 'false');
             
             if (userData.profileImageUrl) {
                 localStorage.setItem('profileImage', userData.profileImageUrl);
@@ -90,9 +95,53 @@ function Login() {
         }
     };
 
+    // Show loading state
+    const showLoading = (isGoogle = false) => {
+        if (isGoogle) {
+            setGoogleLoading(true);
+        } else {
+            setLoading(true);
+        }
+    };
+
+    // Hide loading state
+    const hideLoading = (isGoogle = false) => {
+        if (isGoogle) {
+            setGoogleLoading(false);
+        } else {
+            setLoading(false);
+        }
+    };
+
+    // Show error message
+    const showError = (errorMessage) => {
+        setMessage(errorMessage);
+        setTimeout(() => {
+            setMessage('');
+        }, 5000);
+    };
+
+    // Show demo hint
+    const showDemoHint = () => {
+        setTimeout(() => {
+            const hint = document.createElement('div');
+            
+            document.body.appendChild(hint);
+            
+            setTimeout(() => {
+                hint.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                hint.classList.remove('show');
+                setTimeout(() => hint.remove(), 300);
+            }, 5000);
+        }, 2000);
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        showLoading();
         setMessage('');
         
         try {
@@ -105,7 +154,7 @@ function Login() {
             localStorage.setItem('token', token);
             
             // Проверяем статус пользователя
-            const statusChecked = await checkUserStatus(token);
+            await checkUserStatus(token);
             
             // Перенаправляем
             const redirectPath = localStorage.getItem('loginRedirect') || '/';
@@ -122,36 +171,64 @@ function Login() {
             console.error('Login error:', error);
             
             if (error.response && error.response.data && error.response.data.message) {
-                setMessage('Login failed: ' + error.response.data.message);
+                showError('Login failed: ' + error.response.data.message);
             } else if (error.message) {
-                setMessage('Login failed: ' + error.message);
+                showError('Login failed: ' + error.message);
             } else {
-                setMessage('Login failed: Server error');
+                showError('Login failed: Server error');
             }
         } finally {
-            setLoading(false);
+            hideLoading();
         }
     };
     
     // Direct Google login - avoid CORS issues
     const handleGoogleLogin = () => {
+        showLoading(true);
         // Direct browser navigation to Google auth endpoint
         window.location.href = 'https://localhost:7209/api/GoogleAuth/login';
+    };
+
+    // Handle input validation
+    const handleInputChange = (e, setter) => {
+        setter(e.target.value);
+        // Clear error border if exists
+        if (e.target.style.borderColor === 'rgb(211, 47, 47)') {
+            e.target.style.borderColor = '';
+        }
+    };
+
+    const handleInputBlur = (e) => {
+        if (e.target.value.trim() === '') {
+            e.target.style.borderColor = '#d32f2f';
+        }
     };
 
     return (
         <div className="app-container">
             <div className="login-container">
-                <div className="login-content">
-                    <div className="scrolling-albums">
-                        <div className="albums">
-                            <img src="/images/auth-thumbs.png" alt="Cover" />
-                        </div>
-                        <div className="albums">
-                            <img src="/images/auth-thumbs.png" alt="Cover" />
-                        </div>
+                {/* Decorative Left Panel */}
+                <div className="decorative-panel">
+                    <div className="geometric-shape shape-1"></div>
+                    <div className="geometric-shape shape-2"></div>
+                    <div className="geometric-shape shape-3"></div>
+                    
+                    <div className="brand-section">
+                        <h1 className="brand-title">OG</h1>
+                        <p className="brand-subtitle">
+                            marketplace
+                        </p>
                     </div>
+                </div>
+
+                {/* Form Panel */}
+                <div className="login-content">
                     <div className="login-form">
+                        <div className="form-header">
+                            <h2 className="form-title">Welcome Back</h2>
+                            <p className="form-subtitle">Sign in to your account</p>
+                        </div>
+
                         <form onSubmit={handleLogin}>
                             <div className="form-group">
                                 <label htmlFor="username">
@@ -160,13 +237,15 @@ function Login() {
                                 <input
                                     id="username"
                                     type="text"
-                                    placeholder="Username"
+                                    placeholder="Enter your username"
                                     value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    onChange={(e) => handleInputChange(e, setUsername)}
+                                    onBlur={handleInputBlur}
                                     required
                                     disabled={loading}
                                 />
                             </div>
+
                             <div className="form-group">
                                 <label htmlFor="password">
                                     Password <span className="required">*</span>
@@ -174,36 +253,64 @@ function Login() {
                                 <input
                                     id="password"
                                     type="password"
-                                    placeholder="Password"
+                                    placeholder="Enter your password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => handleInputChange(e, setPassword)}
+                                    onBlur={handleInputBlur}
                                     required
                                     disabled={loading}
                                 />
                             </div>
+
                             <div className="form-group remember-me">
                                 <input type="checkbox" id="remember" />
                                 <label htmlFor="remember">Remember me</label>
                             </div>
 
                             <button type="submit" disabled={loading}>
-                                {loading ? 'Logging in...' : 'Login'}
+                                {loading ? (
+                                    <>
+                                        <span className="loading-spinner"></span>
+                                        Signing in...
+                                    </>
+                                ) : (
+                                    'Sign In'
+                                )}
                             </button>
                         </form>
+
+                        <div className="oauth-section">
+                            <div className="divider">
+                                <span className="divider-text">or continue with</span>
+                            </div>
+
+                            <button 
+                                className="google-button" 
+                                onClick={handleGoogleLogin}
+                                disabled={googleLoading}
+                            >
+                                {googleLoading ? (
+                                    <>
+                                        <span className="loading-spinner" style={{borderTopColor: '#333'}}></span>
+                                        Connecting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="google-icon"></div>
+                                        Continue with Google
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        {message && <div className="error-message">{message}</div>}
                         
-                        {/* OAuth Login Component */}
-                        <OAuthLogin />
+                        <Link to="/register" className="register-link">
+                            Create new account
+                        </Link>
                         
-                        {message && <p className="error-message">{message}</p>}
-                        <Link to="/register" className="register-link">Register</Link>
-                        <p className="forgot-password">Forgot password?</p>
+                        <p className="forgot-password">Forgot your password?</p>
                     </div>
-                </div>
-                <div className="creativity-message">
-                    <p className="undertext">
-                        Express your respect for creativity by posting reviews, analyses, and critiques
-                    </p>
-                    
                 </div>
             </div>
         </div>
