@@ -242,11 +242,11 @@ const AdminUserManagement = () => {
 
   const getRoleBadge = (user) => {
     if (user.role === 'admin') {
-      return <span className="badge badge-danger">Администратор</span>;
+      return <span className="badge badge-admin">Администратор</span>;
     } else if (user.isBusiness) {
-      return <span className="badge badge-primary">Бизнес</span>;
+      return <span className="badge badge-business">Бизнес</span>;
     } else {
-      return <span className="badge badge-secondary">Пользователь</span>;
+      return <span className="badge badge-user">Пользователь</span>;
     }
   };
 
@@ -276,21 +276,22 @@ const AdminUserManagement = () => {
           backgroundColor: 'white',
           padding: '30px',
           borderRadius: '12px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          border: '1px solid #e5e5e5'
         }}>
           <h2 style={{
             margin: '0 0 10px 0',
-            color: '#2c3e50',
+            color: '#1a1a1a',
             display: 'flex',
             alignItems: 'center',
             fontSize: '28px',
             fontWeight: '600'
           }}>
-            <i className="bi bi-people-fill" style={{ marginRight: '15px', color: '#3498db' }}></i>
+            <i className="bi bi-people-fill" style={{ marginRight: '15px', color: '#333' }}></i>
             Управление пользователями
           </h2>
           <p style={{
-            color: '#6c757d',
+            color: '#666',
             margin: 0,
             fontSize: '16px'
           }}>
@@ -301,12 +302,12 @@ const AdminUserManagement = () => {
         {/* Alerts */}
         {error && (
           <div style={{
-            backgroundColor: '#f8d7da',
-            color: '#721c24',
+            background: 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)',
+            color: 'white',
             padding: '15px',
             borderRadius: '8px',
             marginBottom: '20px',
-            border: '1px solid #f5c6cb',
+            border: '1px solid #333',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
@@ -322,7 +323,7 @@ const AdminUserManagement = () => {
                 border: 'none',
                 fontSize: '18px',
                 cursor: 'pointer',
-                color: '#721c24'
+                color: 'white'
               }}
             >
               ×
@@ -332,12 +333,12 @@ const AdminUserManagement = () => {
 
         {success && (
           <div style={{
-            backgroundColor: '#d1edff',
-            color: '#155724',
+            background: 'linear-gradient(135deg, #666 0%, #4a4a4a 100%)',
+            color: 'white',
             padding: '15px',
             borderRadius: '8px',
             marginBottom: '20px',
-            border: '1px solid #c3e6cb',
+            border: '1px solid #666',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
@@ -353,7 +354,7 @@ const AdminUserManagement = () => {
                 border: 'none',
                 fontSize: '18px',
                 cursor: 'pointer',
-                color: '#155724'
+                color: 'white'
               }}
             >
               ×
@@ -367,7 +368,8 @@ const AdminUserManagement = () => {
           padding: '25px',
           borderRadius: '12px',
           marginBottom: '25px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          border: '1px solid #e5e5e5'
         }}>
           <div style={{
             display: 'grid',
@@ -380,7 +382,7 @@ const AdminUserManagement = () => {
                 display: 'block',
                 marginBottom: '8px',
                 fontWeight: '500',
-                color: '#2c3e50'
+                color: '#1a1a1a'
               }}>
                 Поиск пользователей
               </label>
@@ -390,7 +392,7 @@ const AdminUserManagement = () => {
                   left: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#6c757d',
+                  color: '#666',
                   zIndex: 1
                 }}></i>
                 <input
@@ -401,14 +403,21 @@ const AdminUserManagement = () => {
                   style={{
                     width: '100%',
                     padding: '12px 12px 12px 40px',
-                    border: '2px solid #e9ecef',
+                    border: '2px solid #e5e5e5',
                     borderRadius: '8px',
                     fontSize: '14px',
-                    transition: 'border-color 0.3s',
-                    outline: 'none'
+                    transition: 'all 0.3s',
+                    outline: 'none',
+                    backgroundColor: 'white'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#3498db'}
-                  onBlur={(e) => e.target.style.borderColor = '#e9ecef'}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#333';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e5e5';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
               </div>
             </div>
@@ -417,7 +426,7 @@ const AdminUserManagement = () => {
                 display: 'block',
                 marginBottom: '8px',
                 fontWeight: '500',
-                color: '#2c3e50'
+                color: '#1a1a1a'
               }}>
                 Фильтр по роли
               </label>
@@ -427,11 +436,12 @@ const AdminUserManagement = () => {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '2px solid #e9ecef',
+                  border: '2px solid #e5e5e5',
                   borderRadius: '8px',
                   fontSize: '14px',
                   backgroundColor: 'white',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  color: '#1a1a1a'
                 }}
               >
                 <option value="all">Все роли</option>
@@ -446,7 +456,7 @@ const AdminUserManagement = () => {
                 style={{
                   width: '100%',
                   padding: '12px 20px',
-                  backgroundColor: '#3498db',
+                  background: 'linear-gradient(135deg, #333 0%, #1a1a1a 100%)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -456,10 +466,16 @@ const AdminUserManagement = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transition: 'background-color 0.3s'
+                  transition: 'all 0.3s'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#2980b9'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#3498db'}
+                onMouseOver={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #000 100%)';
+                  e.target.style.transform = 'translateY(-1px)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #333 0%, #1a1a1a 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                }}
               >
                 <i className="bi bi-arrow-clockwise" style={{ marginRight: '8px' }}></i>
                 Обновить
@@ -481,17 +497,18 @@ const AdminUserManagement = () => {
             borderRadius: '12px',
             textAlign: 'center',
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            border: '3px solid #3498db'
+            border: '1px solid #333',
+            background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
           }}>
             <i className="bi bi-people" style={{
               fontSize: '40px',
-              color: '#3498db',
+              color: '#333',
               marginBottom: '15px'
             }}></i>
-            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: '#2c3e50' }}>
+            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: '#1a1a1a' }}>
               {users.length}
             </h3>
-            <p style={{ margin: 0, color: '#6c757d', fontWeight: '500' }}>Всего пользователей</p>
+            <p style={{ margin: 0, color: '#666', fontWeight: '500' }}>Всего пользователей</p>
           </div>
           <div style={{
             backgroundColor: 'white',
@@ -499,17 +516,19 @@ const AdminUserManagement = () => {
             borderRadius: '12px',
             textAlign: 'center',
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            border: '3px solid #e74c3c'
+            border: '1px solid #666',
+            background: 'linear-gradient(135deg, #666 0%, #333 100%)',
+            color: 'white'
           }}>
             <i className="bi bi-shield-check" style={{
               fontSize: '40px',
-              color: '#e74c3c',
+              color: 'white',
               marginBottom: '15px'
             }}></i>
-            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: '#2c3e50' }}>
+            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: 'white' }}>
               {users.filter(u => u.role === 'admin').length}
             </h3>
-            <p style={{ margin: 0, color: '#6c757d', fontWeight: '500' }}>Администраторов</p>
+            <p style={{ margin: 0, color: '#e5e5e5', fontWeight: '500' }}>Администраторов</p>
           </div>
           <div style={{
             backgroundColor: 'white',
@@ -517,17 +536,19 @@ const AdminUserManagement = () => {
             borderRadius: '12px',
             textAlign: 'center',
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            border: '3px solid #9b59b6'
+            border: '1px solid #999',
+            background: 'linear-gradient(135deg, #999 0%, #666 100%)',
+            color: 'white'
           }}>
             <i className="bi bi-building" style={{
               fontSize: '40px',
-              color: '#9b59b6',
+              color: 'white',
               marginBottom: '15px'
             }}></i>
-            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: '#2c3e50' }}>
+            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: 'white' }}>
               {users.filter(u => u.isBusiness).length}
             </h3>
-            <p style={{ margin: 0, color: '#6c757d', fontWeight: '500' }}>Бизнес-аккаунтов</p>
+            <p style={{ margin: 0, color: '#e5e5e5', fontWeight: '500' }}>Бизнес-аккаунтов</p>
           </div>
           <div style={{
             backgroundColor: 'white',
@@ -535,17 +556,18 @@ const AdminUserManagement = () => {
             borderRadius: '12px',
             textAlign: 'center',
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            border: '3px solid #95a5a6'
+            border: '1px solid #ccc',
+            background: 'linear-gradient(135deg, #ccc 0%, #999 100%)'
           }}>
             <i className="bi bi-person" style={{
               fontSize: '40px',
-              color: '#95a5a6',
+              color: '#333',
               marginBottom: '15px'
             }}></i>
-            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: '#2c3e50' }}>
+            <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', fontWeight: '700', color: '#1a1a1a' }}>
               {users.filter(u => u.role === 'user' && !u.isBusiness).length}
             </h3>
-            <p style={{ margin: 0, color: '#6c757d', fontWeight: '500' }}>Обычных пользователей</p>
+            <p style={{ margin: 0, color: '#333', fontWeight: '500' }}>Обычных пользователей</p>
           </div>
         </div>
 
@@ -556,19 +578,20 @@ const AdminUserManagement = () => {
             padding: '60px',
             borderRadius: '12px',
             textAlign: 'center',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            border: '1px solid #e5e5e5'
           }}>
             <div style={{
               display: 'inline-block',
               width: '40px',
               height: '40px',
               border: '4px solid #f3f3f3',
-              borderTop: '4px solid #3498db',
+              borderTop: '4px solid #333',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
               marginBottom: '20px'
             }}></div>
-            <p style={{ color: '#6c757d', fontSize: '16px' }}>Загрузка пользователей...</p>
+            <p style={{ color: '#666', fontSize: '16px' }}>Загрузка пользователей...</p>
           </div>
         ) : users.length === 0 && !error ? (
           <div style={{
@@ -576,22 +599,23 @@ const AdminUserManagement = () => {
             padding: '60px',
             borderRadius: '12px',
             textAlign: 'center',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            border: '1px solid #e5e5e5'
           }}>
             <i className="bi bi-people" style={{
               fontSize: '60px',
-              color: '#6c757d',
+              color: '#666',
               marginBottom: '20px'
             }}></i>
-            <h3 style={{ color: '#6c757d', marginBottom: '15px' }}>Пользователи не найдены</h3>
-            <p style={{ color: '#6c757d', marginBottom: '20px' }}>
+            <h3 style={{ color: '#666', marginBottom: '15px' }}>Пользователи не найдены</h3>
+            <p style={{ color: '#666', marginBottom: '20px' }}>
               Возможно, эндпоинт не настроен или у вас нет прав доступа
             </p>
             <button
               onClick={fetchUsers}
               style={{
                 padding: '12px 24px',
-                backgroundColor: '#3498db',
+                background: 'linear-gradient(135deg, #333 0%, #1a1a1a 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -606,7 +630,8 @@ const AdminUserManagement = () => {
             backgroundColor: 'white',
             borderRadius: '12px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            border: '1px solid #e5e5e5'
           }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{
@@ -614,7 +639,9 @@ const AdminUserManagement = () => {
                 borderCollapse: 'collapse'
               }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#2c3e50' }}>
+                  <tr style={{ 
+                    background: 'linear-gradient(135deg, #1a1a1a 0%, #000 100%)'
+                  }}>
                     <th style={{
                       padding: '20px',
                       textAlign: 'left',
@@ -674,11 +701,11 @@ const AdminUserManagement = () => {
                 <tbody>
                   {filteredUsers.map((user, index) => (
                     <tr key={user.id} style={{
-                      borderBottom: '1px solid #e9ecef',
+                      borderBottom: '1px solid #e5e5e5',
                       backgroundColor: index % 2 === 0 ? '#f8f9fa' : 'white',
                       transition: 'background-color 0.3s'
                     }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e3f2fd'}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#f8f9fa' : 'white'}
                     >
                       <td style={{ padding: '20px' }}>
@@ -693,7 +720,7 @@ const AdminUserManagement = () => {
                                   height: '50px',
                                   borderRadius: '50%',
                                   objectFit: 'cover',
-                                  border: '2px solid #e9ecef'
+                                  border: '2px solid #e5e5e5'
                                 }}
                               />
                             ) : (
@@ -701,7 +728,7 @@ const AdminUserManagement = () => {
                                 width: '50px',
                                 height: '50px',
                                 borderRadius: '50%',
-                                backgroundColor: '#3498db',
+                                background: 'linear-gradient(135deg, #333 0%, #666 100%)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -716,14 +743,14 @@ const AdminUserManagement = () => {
                           <div>
                             <div style={{
                               fontWeight: '600',
-                              color: '#2c3e50',
+                              color: '#1a1a1a',
                               fontSize: '16px',
                               marginBottom: '4px'
                             }}>
                               {user.username}
                             </div>
                             <small style={{
-                              color: '#6c757d',
+                              color: '#666',
                               fontSize: '12px'
                             }}>
                               ID: {user.id}
@@ -733,7 +760,7 @@ const AdminUserManagement = () => {
                       </td>
                       <td style={{
                         padding: '20px',
-                        color: '#2c3e50',
+                        color: '#1a1a1a',
                         fontSize: '14px'
                       }}>
                         {user.email}
@@ -743,7 +770,7 @@ const AdminUserManagement = () => {
                       </td>
                       <td style={{
                         padding: '20px',
-                        color: '#6c757d',
+                        color: '#666',
                         fontSize: '14px'
                       }}>
                         {formatDate(user.createdAt)}
@@ -753,14 +780,14 @@ const AdminUserManagement = () => {
                           <div>
                             <div style={{
                               fontWeight: '600',
-                              color: '#2c3e50',
+                              color: '#1a1a1a',
                               fontSize: '14px',
                               marginBottom: '4px'
                             }}>
                               {user.companyName}
                             </div>
                             <small style={{
-                              color: '#6c757d',
+                              color: '#666',
                               fontSize: '12px'
                             }}>
                               {user.companyDescription?.substring(0, 30)}
@@ -768,7 +795,7 @@ const AdminUserManagement = () => {
                             </small>
                           </div>
                         ) : (
-                          <span style={{ color: '#6c757d' }}>—</span>
+                          <span style={{ color: '#666' }}>—</span>
                         )}
                       </td>
                       <td style={{ padding: '20px', textAlign: 'center' }}>
@@ -782,16 +809,22 @@ const AdminUserManagement = () => {
                             title="Редактировать"
                             style={{
                               padding: '8px 12px',
-                              backgroundColor: '#3498db',
+                              background: 'linear-gradient(135deg, #333 0%, #666 100%)',
                               color: 'white',
                               border: 'none',
                               borderRadius: '6px',
                               cursor: 'pointer',
                               fontSize: '14px',
-                              transition: 'background-color 0.3s'
+                              transition: 'all 0.3s'
                             }}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#2980b9'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#3498db'}
+                            onMouseOver={(e) => {
+                              e.target.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.background = 'linear-gradient(135deg, #333 0%, #666 100%)';
+                              e.target.style.transform = 'translateY(0)';
+                            }}
                           >
                             <i className="bi bi-pencil"></i>
                           </button>
@@ -800,16 +833,32 @@ const AdminUserManagement = () => {
                             title={user.isBusiness ? "Убрать бизнес-статус" : "Сделать бизнес-аккаунтом"}
                             style={{
                               padding: '8px 12px',
-                              backgroundColor: user.isBusiness ? '#f39c12' : '#27ae60',
-                              color: 'white',
+                              background: user.isBusiness 
+                                ? 'linear-gradient(135deg, #666 0%, #999 100%)' 
+                                : 'linear-gradient(135deg, #999 0%, #ccc 100%)',
+                              color: user.isBusiness ? 'white' : '#333',
                               border: 'none',
                               borderRadius: '6px',
                               cursor: 'pointer',
                               fontSize: '14px',
-                              transition: 'background-color 0.3s'
+                              transition: 'all 0.3s'
                             }}
-                            onMouseOver={(e) => e.target.style.backgroundColor = user.isBusiness ? '#e67e22' : '#229954'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = user.isBusiness ? '#f39c12' : '#27ae60'}
+                            onMouseOver={(e) => {
+                              if (user.isBusiness) {
+                                e.target.style.background = 'linear-gradient(135deg, #333 0%, #666 100%)';
+                              } else {
+                                e.target.style.background = 'linear-gradient(135deg, #666 0%, #999 100%)';
+                                e.target.style.color = 'white';
+                              }
+                              e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.background = user.isBusiness 
+                                ? 'linear-gradient(135deg, #666 0%, #999 100%)' 
+                                : 'linear-gradient(135deg, #999 0%, #ccc 100%)';
+                              e.target.style.color = user.isBusiness ? 'white' : '#333';
+                              e.target.style.transform = 'translateY(0)';
+                            }}
                           >
                             <i className={user.isBusiness ? "bi bi-building-dash" : "bi bi-building-add"}></i>
                           </button>
@@ -819,22 +868,26 @@ const AdminUserManagement = () => {
                             disabled={user.role === 'admin'}
                             style={{
                               padding: '8px 12px',
-                              backgroundColor: user.role === 'admin' ? '#bdc3c7' : '#e74c3c',
-                              color: 'white',
+                              background: user.role === 'admin' 
+                                ? 'linear-gradient(135deg, #e5e5e5 0%, #ccc 100%)' 
+                                : 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)',
+                              color: user.role === 'admin' ? '#999' : 'white',
                               border: 'none',
                               borderRadius: '6px',
                               cursor: user.role === 'admin' ? 'not-allowed' : 'pointer',
                               fontSize: '14px',
-                              transition: 'background-color 0.3s'
+                              transition: 'all 0.3s'
                             }}
                             onMouseOver={(e) => {
                               if (user.role !== 'admin') {
-                                e.target.style.backgroundColor = '#c0392b';
+                                e.target.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #000 100%)';
+                                e.target.style.transform = 'translateY(-1px)';
                               }
                             }}
                             onMouseOut={(e) => {
                               if (user.role !== 'admin') {
-                                e.target.style.backgroundColor = '#e74c3c';
+                                e.target.style.background = 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)';
+                                e.target.style.transform = 'translateY(0)';
                               }
                             }}
                           >
@@ -850,7 +903,7 @@ const AdminUserManagement = () => {
                 <div style={{
                   textAlign: 'center',
                   padding: '60px',
-                  color: '#6c757d'
+                  color: '#666'
                 }}>
                   <i className="bi bi-search" style={{
                     fontSize: '60px',
@@ -876,7 +929,7 @@ const AdminUserManagement = () => {
             left: 0,
             width: '100%',
             height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.7)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -895,19 +948,21 @@ const AdminUserManagement = () => {
               maxWidth: '600px',
               maxHeight: '90vh',
               overflow: 'auto',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              border: '1px solid #333'
             }}>
               {/* Modal Header */}
               <div style={{
                 padding: '25px',
-                borderBottom: '1px solid #e9ecef',
+                borderBottom: '1px solid #e5e5e5',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
               }}>
                 <h3 style={{
                   margin: 0,
-                  color: '#2c3e50',
+                  color: '#1a1a1a',
                   fontSize: '20px',
                   fontWeight: '600'
                 }}>
@@ -922,13 +977,23 @@ const AdminUserManagement = () => {
                     border: 'none',
                     fontSize: '24px',
                     cursor: 'pointer',
-                    color: '#6c757d',
+                    color: '#666',
                     padding: '0',
                     width: '30px',
                     height: '30px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor = '#e5e5e5';
+                    e.target.style.color = '#333';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = '#666';
                   }}
                 >
                   ×
@@ -941,17 +1006,17 @@ const AdminUserManagement = () => {
                   <div style={{ textAlign: 'center' }}>
                     <i className="bi bi-exclamation-triangle" style={{
                       fontSize: '80px',
-                      color: '#e74c3c',
+                      color: '#333',
                       marginBottom: '20px'
                     }}></i>
                     <h4 style={{
                       margin: '0 0 15px 0',
-                      color: '#2c3e50'
+                      color: '#1a1a1a'
                     }}>
                       Удалить пользователя?
                     </h4>
                     <p style={{
-                      color: '#6c757d',
+                      color: '#666',
                       fontSize: '16px',
                       lineHeight: '1.5'
                     }}>
@@ -972,7 +1037,7 @@ const AdminUserManagement = () => {
                           display: 'block',
                           marginBottom: '8px',
                           fontWeight: '500',
-                          color: '#2c3e50'
+                          color: '#1a1a1a'
                         }}>
                           Имя пользователя
                         </label>
@@ -983,10 +1048,19 @@ const AdminUserManagement = () => {
                           style={{
                             width: '100%',
                             padding: '12px',
-                            border: '2px solid #e9ecef',
+                            border: '2px solid #e5e5e5',
                             borderRadius: '8px',
                             fontSize: '14px',
-                            outline: 'none'
+                            outline: 'none',
+                            transition: 'all 0.3s'
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = '#333';
+                            e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = '#e5e5e5';
+                            e.target.style.boxShadow = 'none';
                           }}
                         />
                       </div>
@@ -995,7 +1069,7 @@ const AdminUserManagement = () => {
                           display: 'block',
                           marginBottom: '8px',
                           fontWeight: '500',
-                          color: '#2c3e50'
+                          color: '#1a1a1a'
                         }}>
                           Email
                         </label>
@@ -1006,10 +1080,19 @@ const AdminUserManagement = () => {
                           style={{
                             width: '100%',
                             padding: '12px',
-                            border: '2px solid #e9ecef',
+                            border: '2px solid #e5e5e5',
                             borderRadius: '8px',
                             fontSize: '14px',
-                            outline: 'none'
+                            outline: 'none',
+                            transition: 'all 0.3s'
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.borderColor = '#333';
+                            e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.borderColor = '#e5e5e5';
+                            e.target.style.boxShadow = 'none';
                           }}
                         />
                       </div>
@@ -1026,7 +1109,7 @@ const AdminUserManagement = () => {
                           display: 'block',
                           marginBottom: '8px',
                           fontWeight: '500',
-                          color: '#2c3e50'
+                          color: '#1a1a1a'
                         }}>
                           Роль
                         </label>
@@ -1036,11 +1119,12 @@ const AdminUserManagement = () => {
                           style={{
                             width: '100%',
                             padding: '12px',
-                            border: '2px solid #e9ecef',
+                            border: '2px solid #e5e5e5',
                             borderRadius: '8px',
                             fontSize: '14px',
                             backgroundColor: 'white',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            color: '#1a1a1a'
                           }}
                         >
                           <option value="user">Пользователь</option>
@@ -1052,7 +1136,7 @@ const AdminUserManagement = () => {
                           display: 'block',
                           marginBottom: '8px',
                           fontWeight: '500',
-                          color: '#2c3e50'
+                          color: '#1a1a1a'
                         }}>
                           Бизнес-аккаунт
                         </label>
@@ -1066,7 +1150,7 @@ const AdminUserManagement = () => {
                             alignItems: 'center',
                             cursor: 'pointer',
                             fontSize: '14px',
-                            color: '#2c3e50'
+                            color: '#1a1a1a'
                           }}>
                             <input
                               type="checkbox"
@@ -1090,7 +1174,7 @@ const AdminUserManagement = () => {
                             display: 'block',
                             marginBottom: '8px',
                             fontWeight: '500',
-                            color: '#2c3e50'
+                            color: '#1a1a1a'
                           }}>
                             Название компании
                           </label>
@@ -1102,10 +1186,19 @@ const AdminUserManagement = () => {
                             style={{
                               width: '100%',
                               padding: '12px',
-                              border: '2px solid #e9ecef',
+                              border: '2px solid #e5e5e5',
                               borderRadius: '8px',
                               fontSize: '14px',
-                              outline: 'none'
+                              outline: 'none',
+                              transition: 'all 0.3s'
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = '#333';
+                              e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = '#e5e5e5';
+                              e.target.style.boxShadow = 'none';
                             }}
                           />
                         </div>
@@ -1114,7 +1207,7 @@ const AdminUserManagement = () => {
                             display: 'block',
                             marginBottom: '8px',
                             fontWeight: '500',
-                            color: '#2c3e50'
+                            color: '#1a1a1a'
                           }}>
                             Описание компании
                           </label>
@@ -1126,12 +1219,21 @@ const AdminUserManagement = () => {
                             style={{
                               width: '100%',
                               padding: '12px',
-                              border: '2px solid #e9ecef',
+                              border: '2px solid #e5e5e5',
                               borderRadius: '8px',
                               fontSize: '14px',
                               resize: 'vertical',
                               outline: 'none',
-                              fontFamily: 'inherit'
+                              fontFamily: 'inherit',
+                              transition: 'all 0.3s'
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.borderColor = '#333';
+                              e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.borderColor = '#e5e5e5';
+                              e.target.style.boxShadow = 'none';
                             }}
                           />
                         </div>
@@ -1144,26 +1246,35 @@ const AdminUserManagement = () => {
               {/* Modal Footer */}
               <div style={{
                 padding: '25px',
-                borderTop: '1px solid #e9ecef',
+                borderTop: '1px solid #e5e5e5',
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '15px'
+                gap: '15px',
+                background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
               }}>
                 <button
                   onClick={() => setShowModal(false)}
                   style={{
                     padding: '12px 24px',
-                    backgroundColor: '#6c757d',
-                    color: 'white',
+                    background: 'linear-gradient(135deg, #ccc 0%, #999 100%)',
+                    color: '#333',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    transition: 'background-color 0.3s'
+                    transition: 'all 0.3s'
                   }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#5a6268'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#6c757d'}
+                  onMouseOver={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #999 0%, #666 100%)';
+                    e.target.style.color = 'white';
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #ccc 0%, #999 100%)';
+                    e.target.style.color = '#333';
+                    e.target.style.transform = 'translateY(0)';
+                  }}
                 >
                   Отмена
                 </button>
@@ -1172,7 +1283,7 @@ const AdminUserManagement = () => {
                     onClick={handleDeleteConfirm}
                     style={{
                       padding: '12px 24px',
-                      backgroundColor: '#e74c3c',
+                      background: 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
@@ -1181,10 +1292,16 @@ const AdminUserManagement = () => {
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      transition: 'background-color 0.3s'
+                      transition: 'all 0.3s'
                     }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#c0392b'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#e74c3c'}
+                    onMouseOver={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #000 100%)';
+                      e.target.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
                   >
                     <i className="bi bi-trash" style={{ marginRight: '8px' }}></i>
                     Удалить
@@ -1194,7 +1311,7 @@ const AdminUserManagement = () => {
                     onClick={handleSaveUser}
                     style={{
                       padding: '12px 24px',
-                      backgroundColor: '#27ae60',
+                      background: 'linear-gradient(135deg, #666 0%, #333 100%)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
@@ -1203,10 +1320,16 @@ const AdminUserManagement = () => {
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      transition: 'background-color 0.3s'
+                      transition: 'all 0.3s'
                     }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#229954'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#27ae60'}
+                    onMouseOver={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #333 0%, #1a1a1a 100%)';
+                      e.target.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #666 0%, #333 100%)';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
                   >
                     <i className="bi bi-check-lg" style={{ marginRight: '8px' }}></i>
                     Сохранить
@@ -1218,7 +1341,7 @@ const AdminUserManagement = () => {
         )}
       </div>
 
-      {/* Add CSS for animations */}
+      {/* Add CSS for animations and badges */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -1234,19 +1357,19 @@ const AdminUserManagement = () => {
           letter-spacing: 0.5px;
         }
         
-        .badge-danger {
-          background-color: #e74c3c;
+        .badge-admin {
+          background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
           color: white;
         }
         
-        .badge-primary {
-          background-color: #3498db;
+        .badge-business {
+          background: linear-gradient(135deg, #666 0%, #333 100%);
           color: white;
         }
         
-        .badge-secondary {
-          background-color: #95a5a6;
-          color: white;
+        .badge-user {
+          background: linear-gradient(135deg, #ccc 0%, #999 100%);
+          color: #333;
         }
         
         @media (max-width: 768px) {

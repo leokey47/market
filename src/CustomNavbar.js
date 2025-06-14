@@ -258,7 +258,7 @@ const CustomNavbar = () => {
                             onClick={handleNavigateToAdmin}
                           >
                             <i className="bi bi-gear-fill"></i>
-                            Управление продуктами
+                            Управление продукт.
                           </button>
                           <button 
                             type="button"
@@ -266,7 +266,7 @@ const CustomNavbar = () => {
                             onClick={handleNavigateToAdminUsers}
                           >
                             <i className="bi bi-people-fill"></i>
-                            Управление пользователями
+                            Управление пользов.
                           </button>
                           <button 
                             type="button"

@@ -267,7 +267,7 @@
     position: absolute;
     top: calc(100% + 0.5rem);
     right: 0;
-    width: 180px;
+    width: 210px;
     background-color: var(--bg-light);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-lg);
