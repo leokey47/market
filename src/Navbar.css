@@ -3,14 +3,14 @@
 /* Core variables */
 :root {
     --brand-color: #000000;
-    --brand-hover: #4823d9;
+    --brand-hover: #2c2c2c;
     --text-primary: #333333;
     --text-secondary: #555555;
     --bg-light: #ffffff;
     --bg-gray: #f9f9f9;
     --border-color: #eaeaea;
     --badge-wishlist: #e91e63;
-    --badge-cart: #5A31F4;
+    --badge-cart: #000000;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
     --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.05);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);

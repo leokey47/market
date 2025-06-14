@@ -24,7 +24,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #3c6ebe;
+    background-color: #000000;
     color: white;
     padding: 16px 24px;
     border-radius: 8px;
@@ -182,12 +182,12 @@ body {
 }
 
 .save-button {
-    background-color: #4caf50;
+    background-color: #000000;
     color: white;
 }
 
 .save-button:hover {
-    background-color: #3c8c40;
+    background-color: #1d1d1d;
 }
 
 .cancel-button {
@@ -356,13 +356,13 @@ body {
 }
 
 .edit-button {
-    background-color: #3c6ebe;
+    background-color: #000000;
     color: white;
     margin-right: 8px;
 }
 
 .edit-button:hover {
-    background-color: #2c5aa0;
+    background-color: #181818;
 }
 
 .delete-button {
