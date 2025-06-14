@@ -137,6 +137,12 @@ const CustomNavbar = () => {
     navigate('/admin');
   };
 
+  const handleNavigateToAdminUsers = () => {
+    console.log('Navigating to admin users...');
+    setIsDropdownOpen(false);
+    navigate('/admin/users');
+  };
+
   const handleNavigateToAdminPayments = () => {
     console.log('Navigating to admin payments...');
     setIsDropdownOpen(false);
@@ -239,36 +245,46 @@ const CustomNavbar = () => {
                       >
                         Мои заказы
                       </button>
-                      {/* <button 
-                        type="button"
-                        className="dropdown-item"
-                        onClick={handleNavigateToCheckout}
-                      >
-                        Оформить заказ
-                      </button> */}
                       {userRole === 'admin' && (
                         <>
+                          <div className="dropdown-divider"></div>
+                          <div className="dropdown-header">
+                            <i className="bi bi-shield-check"></i>
+                            Администрирование
+                          </div>
                           <button 
                             type="button"
-                            className="dropdown-item"
+                            className="dropdown-item admin-item"
                             onClick={handleNavigateToAdmin}
                           >
-                            Админ панель
+                            <i className="bi bi-gear-fill"></i>
+                            Управление продуктами
                           </button>
                           <button 
                             type="button"
-                            className="dropdown-item"
+                            className="dropdown-item admin-item"
+                            onClick={handleNavigateToAdminUsers}
+                          >
+                            <i className="bi bi-people-fill"></i>
+                            Управление пользователями
+                          </button>
+                          <button 
+                            type="button"
+                            className="dropdown-item admin-item"
                             onClick={handleNavigateToAdminPayments}
                           >
+                            <i className="bi bi-credit-card-fill"></i>
                             Управление заказами
                           </button>
                         </>
                       )}
+                      <div className="dropdown-divider"></div>
                       <button 
                         type="button"
-                        className="dropdown-item" 
+                        className="dropdown-item logout-item" 
                         onClick={handleLogout}
                       >
+                        <i className="bi bi-box-arrow-right"></i>
                         Выйти
                       </button>
                     </div>
@@ -296,6 +312,79 @@ const CustomNavbar = () => {
           </div>
         </div>
       </nav>
+      
+      {/* Дополнительные стили для админских элементов */}
+      <style>{`
+        .dropdown-divider {
+          height: 1px;
+          margin: 8px 0;
+          background-color: #e9ecef;
+        }
+        
+        .dropdown-header {
+          display: flex;
+          align-items: center;
+          padding: 8px 16px;
+          margin-bottom: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #6c757d;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .dropdown-header i {
+          margin-right: 8px;
+          font-size: 14px;
+        }
+        
+        .admin-item {
+          display: flex !important;
+          align-items: center;
+          color: #3498db !important;
+          font-weight: 500;
+        }
+        
+        .admin-item:hover {
+          background-color: #e3f2fd !important;
+          color: #2980b9 !important;
+        }
+        
+        .admin-item i {
+          margin-right: 10px;
+          font-size: 14px;
+          width: 16px;
+        }
+        
+        .logout-item {
+          display: flex !important;
+          align-items: center;
+          color: #e74c3c !important;
+          font-weight: 500;
+        }
+        
+        .logout-item:hover {
+          background-color: #fdeaea !important;
+          color: #c0392b !important;
+        }
+        
+        .logout-item i {
+          margin-right: 10px;
+          font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+          .dropdown-menu {
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            left: 10px;
+            width: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+          }
+        }
+      `}</style>
     </header>
   );
 };

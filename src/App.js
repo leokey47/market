@@ -7,6 +7,7 @@ import ProductDetailPage from './ProductDetailPage';
 import LoginPage from './Login';
 import RegisterPage from './Register';
 import AdminPanel from './AdminPanel';
+import AdminUserManagement from './AdminUserManagement'; // Новый импорт
 import UserProfile from './UserProfile';
 import CartPage from './CartPage';
 import WishlistPage from './WishlistPage';
@@ -174,6 +175,7 @@ const App = () => {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/oauth-callback" element={<OAuthCallback />} />
               <Route path="/admin" element={<AdminRoute element={<AdminPanel />} />} />
+              <Route path="/admin/users" element={<AdminRoute element={<AdminUserManagement />} />} />
               <Route path="/admin/payments" element={<AdminRoute element={<AdminPaymentManager />} />} />
               <Route path="/profile" element={<PrivateRoute element={<UserProfile />} />} />
               <Route path="/cart" element={<PrivateRoute element={<CartPage />} />} />
