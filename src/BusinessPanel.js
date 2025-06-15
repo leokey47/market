@@ -21,26 +21,11 @@ function BusinessPanel() {
     const [additionalImages, setAdditionalImages] = useState([]);
     const [uploadStatus, setUploadStatus] = useState('');
     const [error, setError] = useState(null);
-    const [customCategory, setCustomCategory] = useState('');
-    const [showCustomCategory, setShowCustomCategory] = useState(false);
     const [existingCategories, setExistingCategories] = useState([]);
+    const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
     const navigate = useNavigate();
 
-    // Предустановленные категории
-    const defaultCategories = [
-        'Техника',
-        'Инструменты',
-        'Одежда',
-        'Книги',
-        'Игрушки',
-        'Спорт',
-        'Автозапчасти',
-        'Дом и сад',
-        'Красота и здоровье',
-        'Продукты питания',
-        'Мебель',
-        'Электроника'
-    ];
+    // Убираем предустановленные категории - используем только из базы данных
 
     useEffect(() => {
         const fetchBusinessData = async () => {
@@ -89,31 +74,44 @@ function BusinessPanel() {
     };
 
     const handleCategoryChange = (e) => {
-        const selectedValue = e.target.value;
-        
-        if (selectedValue === 'custom') {
-            setShowCustomCategory(true);
-            setProductForm({
-                ...productForm,
-                category: ''
-            });
-        } else {
-            setShowCustomCategory(false);
-            setCustomCategory('');
-            setProductForm({
-                ...productForm,
-                category: selectedValue
-            });
-        }
-    };
-
-    const handleCustomCategoryChange = (e) => {
         const value = e.target.value;
-        setCustomCategory(value);
         setProductForm({
             ...productForm,
             category: value
         });
+        
+        // Показываем подсказки только если есть текст и он не пустой
+        setShowCategorySuggestions(value.length > 0);
+    };
+
+    const handleCategoryFocus = () => {
+        setShowCategorySuggestions(true);
+    };
+
+    const handleCategoryBlur = () => {
+        // Задержка, чтобы пользователь мог кликнуть на подсказку
+        setTimeout(() => setShowCategorySuggestions(false), 200);
+    };
+
+    const selectCategory = (category) => {
+        setProductForm({
+            ...productForm,
+            category: category
+        });
+        setShowCategorySuggestions(false);
+    };
+
+    // Функция для фильтрации категорий по введенному тексту (только из базы данных)
+    const getFilteredCategories = () => {
+        const inputValue = productForm.category.toLowerCase();
+        
+        if (!inputValue || existingCategories.length === 0) {
+            return existingCategories;
+        }
+        
+        return existingCategories.filter(category => 
+            category.toLowerCase().includes(inputValue)
+        );
     };
 
     const handleMainImageChange = (e) => {
@@ -183,9 +181,9 @@ function BusinessPanel() {
     const handleSubmitProduct = async (e) => {
         e.preventDefault();
         
-        // Проверяем, что категория выбрана или введена
+        // Проверяем, что категория введена
         if (!productForm.category || productForm.category.trim() === '') {
-            alert('Пожалуйста, выберите или введите категорию товара');
+            alert('Пожалуйста, введите категорию товара');
             return;
         }
         
@@ -253,8 +251,7 @@ function BusinessPanel() {
             });
             setMainImage(null);
             setAdditionalImages([]);
-            setCustomCategory('');
-            setShowCustomCategory(false);
+            setShowCategorySuggestions(false);
             
         } catch (error) {
             console.error('Ошибка создания товара:', error);
@@ -311,9 +308,6 @@ function BusinessPanel() {
             setIsLoading(false);
         }
     };
-
-    // Объединяем все доступные категории (предустановленные + существующие + без дубликатов)
-    const allCategories = [...new Set([...defaultCategories, ...existingCategories])].sort();
 
     if (isLoading) {
         return (
@@ -436,37 +430,38 @@ function BusinessPanel() {
                                         />
                                     </div>
 
-                                    <div className="form-group">
+                                    <div className="form-group category-input-group">
                                         <label htmlFor="category">Категория</label>
-                                        <select
-                                            id="category"
-                                            name="category"
-                                            value={showCustomCategory ? 'custom' : productForm.category}
-                                            onChange={handleCategoryChange}
-                                            required={!showCustomCategory}
-                                        >
-                                            <option value="">Выберите категорию</option>
-                                            {allCategories.map((category, index) => (
-                                                <option key={index} value={category}>{category}</option>
-                                            ))}
-                                            <option value="custom">💭 Создать новую категорию</option>
-                                        </select>
-                                        
-                                        {showCustomCategory && (
-                                            <div className="custom-category-input" style={{ marginTop: '10px' }}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Введите название новой категории"
-                                                    value={customCategory}
-                                                    onChange={handleCustomCategoryChange}
-                                                    required
-                                                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                                                />
-                                                <small style={{ display: 'block', marginTop: '5px', color: '#666' }}>
-                                                    Введите название новой категории или выберите из списка выше
-                                                </small>
-                                            </div>
-                                        )}
+                                        <div className="category-input-container">
+                                            <input
+                                                type="text"
+                                                id="category"
+                                                name="category"
+                                                value={productForm.category}
+                                                onChange={handleCategoryChange}
+                                                onFocus={handleCategoryFocus}
+                                                onBlur={handleCategoryBlur}
+                                                placeholder="Введите или выберите категорию"
+                                                required
+                                                autoComplete="off"
+                                            />
+                                            {showCategorySuggestions && existingCategories.length > 0 && getFilteredCategories().length > 0 && (
+                                                <div className="category-suggestions">
+                                                    {getFilteredCategories().slice(0, 8).map((category, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="category-suggestion"
+                                                            onClick={() => selectCategory(category)}
+                                                        >
+                                                            {category}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <small className="category-help-text">
+                                              {existingCategories.length > 0 ? 'или выберите из существующих' : ''}
+                                        </small>
                                     </div>
                                 </div>
 
